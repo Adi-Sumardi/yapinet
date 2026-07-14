@@ -88,14 +88,48 @@ npm run dev
 
 ## Deploy ke Hostinger (Business Shared Hosting, domain yapinet.id)
 
+Struktur: `yapinet.id` (root domain) = frontend statis, `api.yapinet.id`
+(subdomain) = backend Laravel. Bearer-token auth (Sanctum PAT, bukan cookie)
+jadi CORS lintas-subdomain aman tanpa `supports_credentials`.
+
+### Setup satu kali (lewat hPanel)
+
 1. Buat database MySQL & user di hPanel, pilih PHP 8.3.
-2. Aktifkan SSH & Git deploy (fitur Git di hPanel) untuk `backend/`.
-3. `composer install --no-dev --optimize-autoloader`, lalu
-   `php artisan migrate --force` dan `php artisan db:seed --force` (sekali).
-4. Set Cron Job: `* * * * * php /path/to/backend/artisan schedule:run >> /dev/null 2>&1`
-5. Build frontend (`npm run build` di `frontend/`) dan upload isi `dist/` ke
-   `public_html` (atau subdomain terpisah), set `VITE_API_URL` sebelum build.
-6. Set `FRONTEND_URL` di `backend/.env` ke URL PWA produksi (mis. `https://yapinet.id`).
+2. Buat subdomain **api.yapinet.id**, document root diarahkan ke
+   `~/yapinet/backend/public` (bukan ke folder `backend/` itu sendiri).
+3. Domain utama **yapinet.id** document root-nya `public_html` biasa — ini
+   yang nanti diisi build statis frontend.
+4. `git clone` repo ini ke `~/yapinet` di server (lewat SSH/Termius).
+5. Salin `backend/.env.example` → `backend/.env`, isi kredensial produksi:
+   `APP_URL=https://api.yapinet.id`, `FRONTEND_URL=https://yapinet.id`,
+   `SANCTUM_STATEFUL_DOMAINS=yapinet.id`, `DB_*` sesuai database di hPanel,
+   `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, dan
+   `GOOGLE_REDIRECT_URI=https://api.yapinet.id/api/auth/google/callback`
+   (daftarkan juga persis sama sebagai Authorized redirect URI di Google
+   Cloud Console).
+6. Aktifkan SSH key di hPanel (Advanced > SSH Access) supaya `rsync` dari
+   langkah deploy frontend tidak minta password tiap kali.
+7. Set Cron Job hPanel (sekali saja):
+   `* * * * * php /home/USERNAME/yapinet/backend/artisan schedule:run >> /dev/null 2>&1`
+8. `php artisan db:seed --force` (sekali, untuk App Registry awal).
+
+### Deploy rutin (tiap ada perubahan)
+
+- **Backend** — SSH/Termius ke server, lalu:
+  ```bash
+  cd ~/yapinet/backend && bash deploy.sh
+  ```
+  (`deploy.sh` melakukan git pull, composer install kalau perlu, migrate,
+  clear+cache config/route/view, storage:link.)
+- **Frontend** — dari komputer lokal (Hostinger Business Shared Hosting
+  tidak menjamin runtime Node.js untuk build di server):
+  ```bash
+  HOSTINGER_SSH=uXXXXXXXXX@yapinet.id HOSTINGER_PORT=65002 bash deploy-frontend.sh
+  ```
+  (build lokal `npm run build` dengan `VITE_API_URL=https://api.yapinet.id`,
+  lalu `rsync` isi `frontend/dist/` ke `public_html` domain utama — isi
+  `HOSTINGER_SSH`/`HOSTINGER_PORT`/`HOSTINGER_PATH` sesuai akun Hostinger,
+  lihat komentar di dalam script.)
 
 ## Menambah aplikasi unit baru
 
