@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\GoogleIdentity;
 use App\Models\User;
 use App\Models\UserAppAccess;
+use App\Models\YapinetApp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -42,12 +43,15 @@ class AuthController extends Controller
                 return $identity->user;
             }
 
-            // Belum pernah login — buat user berstatus pending, admin yang
-            // akan memberi hak akses aplikasi lewat user_app_access (FR-08).
+            // Belum pernah login — langsung aktif dan diberi akses ke semua
+            // aplikasi (lihat auto-grant di bawah), bukan status pending
+            // menunggu admin. Sesuai keputusan user 2026-07-14: semua orang
+            // yang login lewat Google otomatis dapat 11 menu, tidak perlu
+            // digrant manual satu-satu lewat panel admin.
             $user = User::create([
                 'full_name' => $googleUser->getName() ?? $googleUser->getEmail(),
                 'primary_email' => $googleUser->getEmail(),
-                'status' => 'pending',
+                'status' => 'active',
             ]);
 
             GoogleIdentity::create([
@@ -60,6 +64,17 @@ class AuthController extends Controller
 
             return $user;
         });
+
+        // Pastikan user (baru maupun lama) punya akses ke setiap aplikasi
+        // aktif — dijalankan tiap login (bukan hanya saat user baru dibuat)
+        // supaya aplikasi baru yang ditambahkan ke App Registry belakangan
+        // otomatis ikut muncul buat user lama juga di login berikutnya.
+        foreach (YapinetApp::where('is_active', true)->get() as $app) {
+            UserAppAccess::firstOrCreate(
+                ['user_id' => $user->id, 'app_id' => $app->id, 'unit_id' => null],
+                ['yayasan_role' => 'bph', 'can_act' => true]
+            );
+        }
 
         AuditLog::create([
             'user_id' => $user->id,
