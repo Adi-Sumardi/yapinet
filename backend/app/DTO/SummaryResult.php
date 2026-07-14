@@ -15,6 +15,7 @@ final readonly class SummaryResult
         public string $status, // ok | warning | critical | degraded
         public ?string $headline,
         public array $metrics, // list of ['label' => ..., 'value' => ...]
+        public array $details, // free-form per-app payload for custom detail views
         public ?CarbonImmutable $updatedAt,
         public ?string $detailPath,
     ) {
@@ -26,6 +27,7 @@ final readonly class SummaryResult
             status: 'degraded',
             headline: $reason,
             metrics: [],
+            details: [],
             updatedAt: null,
             detailPath: null,
         );

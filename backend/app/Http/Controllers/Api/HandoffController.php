@@ -53,19 +53,23 @@ class HandoffController extends Controller
             'metadata' => ['target_path' => $targetPath],
         ]);
 
-        $baseUrl = rtrim($app->base_url, '/');
+        // public_url adalah tautan yang benar-benar dibuka pengguna di
+        // browser; base_url dipakai untuk panggilan API server-to-server dan
+        // di lokal sengaja diarahkan ke dev server (mis. http://127.0.0.1:8001)
+        // — tidak boleh ikut jadi link publik yang dibuka pengguna.
+        $publicBaseUrl = rtrim($app->public_url ?: $app->base_url, '/');
 
         if (! $app->sso_endpoint) {
             // Aplikasi belum mendukung SSO handoff — fallback ke tautan biasa (lihat callout Bab 06).
             return response()->json([
-                'redirect_url' => $baseUrl . ($targetPath ? '/' . ltrim($targetPath, '/') : ''),
+                'redirect_url' => $publicBaseUrl . ($targetPath ? '/' . ltrim($targetPath, '/') : ''),
             ]);
         }
 
         $ssoPath = '/' . ltrim($app->sso_endpoint, '/');
 
         return response()->json([
-            'redirect_url' => "{$baseUrl}{$ssoPath}?ticket={$plainTicket}",
+            'redirect_url' => "{$publicBaseUrl}{$ssoPath}?ticket={$plainTicket}",
         ]);
     }
 

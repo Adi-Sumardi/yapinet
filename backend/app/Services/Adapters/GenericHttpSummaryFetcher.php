@@ -49,6 +49,7 @@ class GenericHttpSummaryFetcher implements SummaryFetcher
                 status: $data['status'] ?? 'degraded',
                 headline: $data['headline'] ?? null,
                 metrics: $data['metrics'] ?? [],
+                details: $data['details'] ?? [],
                 updatedAt: isset($data['updated_at']) ? CarbonImmutable::parse($data['updated_at']) : null,
                 detailPath: $data['detail_path'] ?? null,
             );

@@ -88,6 +88,7 @@ class AuthController extends Controller
                 'full_name' => $user->full_name,
                 'primary_email' => $user->primary_email,
                 'status' => $user->status,
+                'is_admin' => $user->is_admin,
             ],
             'app_access' => $access,
         ]);

@@ -1,33 +1,63 @@
 @import "tailwindcss";
 
+/*
+ * "Institutional Blue" — identitas visual Yapinet mengikuti ui-ux/YAPINET.dc.html:
+ * navy gradient untuk splash/hero, aksen biru institusi, Poppins untuk judul,
+ * Inter untuk teks isi.
+ */
 @theme {
-  --color-paper: #f6f4ee;
-  --color-ink: #1c2230;
-  --color-ink-soft: #565f72;
-  --color-accent: #2e4f8a;
-  --color-accent-strong: #1d3b6e;
-  --color-accent-soft: #e4ebf7;
-  --color-line: #dedacc;
-  --color-good: #2f7a4f;
-  --color-good-soft: #e4f2e9;
-  --color-warn: #9a6b15;
-  --color-warn-soft: #f5ebd8;
-  --color-crit: #ae3b26;
-  --color-crit-soft: #f7e4df;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Poppins', var(--font-sans);
+
+  --color-paper: #f7f9fb;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f2f5f8;
+
+  --color-ink: #212b36;
+  --color-ink-soft: #6b7785;
+  --color-ink-faint: #9aa5b1;
+
+  --color-accent: #2e6da4;
+  --color-accent-strong: #1d4c78;
+  --color-accent-deep: #0f2a52;
+  --color-accent-mid: #1a3d6e;
+  --color-accent-soft: #eaf3fa;
+
+  --color-line: #dfe6ec;
+  --color-line-soft: #eef1f4;
+
+  --color-good: #1f8a5b;
+  --color-good-soft: #e7f6ee;
+  --color-warn: #b3811f;
+  --color-warn-soft: #fdf3e3;
+  --color-crit: #d64545;
+  --color-crit-soft: #fdeceb;
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 body {
   margin: 0;
   background: var(--color-paper);
   color: var(--color-ink);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
 #root {
   min-height: 100svh;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.tap-scale {
+  transition: transform 0.15s ease;
+}
+
+.tap-scale:active {
+  transform: scale(0.96);
 }

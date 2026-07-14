@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AccessController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\HandoffController;
@@ -18,4 +19,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
     Route::post('/apps/{code}/refresh', [DashboardController::class, 'refresh']);
     Route::get('/apps/{code}/handoff', [HandoffController::class, 'issue']);
+
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/users', [AccessController::class, 'users']);
+        Route::get('/apps', [AccessController::class, 'apps']);
+        Route::get('/access', [AccessController::class, 'grants']);
+        Route::post('/access', [AccessController::class, 'grant']);
+        Route::delete('/access/{userAppAccess}', [AccessController::class, 'revoke']);
+    });
 });

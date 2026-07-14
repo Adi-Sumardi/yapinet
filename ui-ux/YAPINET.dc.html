@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;background:#f7f9fb;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Poppins',system-ui,sans-serif}
+  a{color:#2E6DA4}
+  a:hover{color:#1d4c78}
+  ::selection{background:#cfe4f7}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</helmet>
+
+<div style="width:100%;min-height:100vh;background:#f7f9fb;display:flex;align-items:stretch;justify-content:center">
+
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Login" style="width:100%;min-height:100vh;display:flex">
+      <div style="flex:1.1;background:linear-gradient(135deg,#0f2a52 0%,#1a3d6e 55%,#2E6DA4 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;padding:60px;position:relative;overflow:hidden">
+        <div style="position:absolute;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,0.06);top:-120px;left:-140px"></div>
+        <div style="position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.05);bottom:-100px;right:-80px"></div>
+        <div style="position:relative;z-index:1;text-align:center;max-width:420px">
+          <div style="width:96px;height:96px;border-radius:22px;background:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;box-shadow:0 12px 30px rgba(0,0,0,0.25);overflow:hidden;padding:6px;box-sizing:border-box">
+            <img src="assets/yapinet-logo.png" alt="YAPINET" style="width:100%;height:100%;object-fit:contain;border-radius:16px" />
+          </div>
+          <h1 style="font-size:32px;font-weight:700;margin:0 0 12px;line-height:1.25">Satu Aplikasi, Semua Layanan Yayasan</h1>
+          <p style="font-size:15px;line-height:1.6;color:rgba(255,255,255,0.75);margin:0">YAPINET menghubungkan akademik, keuangan, SDM, dan operasional dalam satu ekosistem super app.</p>
+        </div>
+        <div style="position:absolute;bottom:32px;font-size:12px;color:rgba(255,255,255,0.5)">© 2026 Yayasan Pendidikan Islam — YAPINET</div>
+      </div>
+
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:40px;background:#fff">
+        <div style="width:100%;max-width:380px;animation:fadeUp 0.5s ease both">
+          <div style="width:56px;height:56px;border-radius:16px;overflow:hidden;margin-bottom:24px;box-shadow:0 4px 12px rgba(26,61,110,0.2)">
+            <img src="assets/yapinet-logo.png" alt="YAPINET" style="width:100%;height:100%;object-fit:cover" />
+          </div>
+          <h2 style="font-size:26px;font-weight:700;color:#0f2a52;margin:0 0 6px">Masuk ke YAPINET</h2>
+          <p style="font-size:14px;color:#6b7785;margin:0 0 32px">Gunakan email institusi Anda untuk melanjutkan.</p>
+
+          <label style="display:block;font-size:13px;font-weight:600;color:#33404d;margin-bottom:8px">Alamat Email</label>
+          <input
+            type="email"
+            placeholder="nama@yapinet.sch.id"
+            value="{{ email }}"
+            onChange="{{ onEmailChange }}"
+            onKeyDown="{{ onEmailKeyDown }}"
+            style="width:100%;box-sizing:border-box;padding:14px 16px;border-radius:10px;border:1.5px solid #dfe6ec;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s"
+            style-focus="border-color:#2E6DA4"
+          />
+          <sc-if value="{{ showError }}" hint-placeholder-val="{{ false }}">
+            <div style="color:#d64545;font-size:12.5px;margin-top:8px">Masukkan alamat email yang valid.</div>
+          </sc-if>
+
+          <button
+            onClick="{{ onSubmit }}"
+            style="width:100%;margin-top:24px;padding:14px 0;border:none;border-radius:10px;background:{{ buttonBg }};color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .15s"
+            style-hover="opacity:0.92"
+          >Masuk</button>
+
+          <p style="text-align:center;font-size:12.5px;color:#9aa5b1;margin-top:28px">Butuh bantuan akses? Hubungi Admin Yayasan.</p>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Dashboard" style="width:100%;min-height:100vh;background:#f7f9fb">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 48px;background:#fff;border-bottom:1px solid #eef1f4">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:12px;overflow:hidden;box-shadow:0 3px 8px rgba(26,61,110,0.2)">
+            <img src="assets/yapinet-logo.png" alt="YAPINET" style="width:100%;height:100%;object-fit:cover" />
+          </div>
+          <span style="font:700 16px 'Poppins',sans-serif;color:#0f2a52">YAPINET</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:18px">
+          <span style="font-size:13.5px;color:#6b7785">{{ email }}</span>
+          <div style="width:36px;height:36px;border-radius:50%;background:#e9edf1;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#33404d">{{ initials }}</div>
+          <button onClick="{{ onLogout }}" style="border:1.5px solid #dfe6ec;background:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;color:#33404d;cursor:pointer;font-family:inherit" style-hover="background:#f2f5f8">Keluar</button>
+        </div>
+      </div>
+
+      <div style="max-width:1080px;margin:0 auto;padding:56px 32px 80px;text-align:center;animation:fadeUp 0.4s ease both">
+        <div style="width:72px;height:72px;border-radius:22px;overflow:hidden;margin:0 auto 24px;box-shadow:0 10px 24px rgba(26,61,110,0.25)">
+          <img src="assets/yapinet-logo.png" alt="YAPINET" style="width:100%;height:100%;object-fit:cover" />
+        </div>
+        <h1 style="font-size:30px;font-weight:700;color:#212b36;margin:0 0 10px">Selamat Datang di Dashboard <span style="color:#2E6DA4">YAPINET</span></h1>
+        <p style="font-size:15px;color:#6b7785;margin:0 0 44px">Let's <span style="color:#2E6DA4;font-weight:600">connect</span></p>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
+          <sc-for list="{{ modules }}" as="m" hint-placeholder-count="12">
+            <div
+              onClick="{{ m.onClick }}"
+              style="background:{{ m.bg }};border-radius:14px;padding:32px 16px;display:flex;flex-direction:column;align-items:center;gap:14px;cursor:pointer;transition:transform .15s,box-shadow .15s"
+              style-hover="transform:translateY(-3px);box-shadow:0 10px 22px rgba(20,30,45,0.08)"
+            >
+              <div style="width:56px;height:56px;border-radius:50%;background:{{ m.color }};display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px {{ m.shadow }}">
+                <span style="font:700 15px 'Poppins',sans-serif;color:#fff">{{ m.initials }}</span>
+              </div>
+              <span style="font-size:14px;font-weight:600;color:#212b36;text-align:center">{{ m.name }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Detail" style="width:100%;min-height:100vh;background:#f7f9fb">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 48px;background:#fff;border-bottom:1px solid #eef1f4">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:12px;overflow:hidden;box-shadow:0 3px 8px rgba(26,61,110,0.2)">
+            <img src="assets/yapinet-logo.png" alt="YAPINET" style="width:100%;height:100%;object-fit:cover" />
+          </div>
+          <span style="font:700 16px 'Poppins',sans-serif;color:#0f2a52">YAPINET</span>
+        </div>
+        <button onClick="{{ onLogout }}" style="border:1.5px solid #dfe6ec;background:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;color:#33404d;cursor:pointer;font-family:inherit" style-hover="background:#f2f5f8">Keluar</button>
+      </div>
+
+      <div style="max-width:1080px;margin:0 auto;padding:36px 32px 80px;animation:fadeUp 0.4s ease both">
+        <button onClick="{{ onBack }}" style="border:none;background:none;color:#2E6DA4;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;padding:0;margin-bottom:20px;display:flex;align-items:center;gap:6px">← Kembali ke Dashboard</button>
+
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px">
+          <div style="width:52px;height:52px;border-radius:14px;background:{{ selected.color }};display:flex;align-items:center;justify-content:center">
+            <span style="font:700 14px 'Poppins',sans-serif;color:#fff">{{ selected.initials }}</span>
+          </div>
+          <div>
+            <h1 style="font-size:24px;font-weight:700;color:#212b36;margin:0">{{ selected.name }}</h1>
+            <p style="font-size:13.5px;color:#6b7785;margin:2px 0 0">{{ selected.tagline }}</p>
+          </div>
+        </div>
+
+        <sc-if value="{{ isEspp }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:32px">
+            <div style="background:#fff;border-radius:14px;padding:22px;border:1px solid #eef1f4">
+              <p style="font-size:12.5px;color:#8a94a0;margin:0 0 8px;font-weight:600">TOTAL TAGIHAN</p>
+              <p style="font-size:24px;font-weight:700;color:#212b36;margin:0">Rp 458.200.000</p>
+            </div>
+            <div style="background:#fff;border-radius:14px;padding:22px;border:1px solid #eef1f4">
+              <p style="font-size:12.5px;color:#8a94a0;margin:0 0 8px;font-weight:600">SUDAH DIBAYAR</p>
+              <p style="font-size:24px;font-weight:700;color:#1f8a5b;margin:0">Rp 341.600.000</p>
+            </div>
+            <div style="background:#fff;border-radius:14px;padding:22px;border:1px solid #eef1f4">
+              <p style="font-size:12.5px;color:#8a94a0;margin:0 0 8px;font-weight:600">BELUM DIBAYAR</p>
+              <p style="font-size:24px;font-weight:700;color:#d64545;margin:0">Rp 116.600.000</p>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:14px;border:1px solid #eef1f4;overflow:hidden">
+            <div style="padding:18px 22px;border-bottom:1px solid #eef1f4;display:flex;align-items:center;justify-content:between">
+              <span style="font-size:14.5px;font-weight:700;color:#212b36">Riwayat Tagihan Siswa</span>
+            </div>
+            <div style="display:grid;grid-template-columns:2.2fr 1.3fr 1.3fr 1fr;padding:12px 22px;font-size:12px;font-weight:700;color:#8a94a0;letter-spacing:0.3px">
+              <span>NAMA SISWA</span><span>KELAS</span><span>NOMINAL</span><span>STATUS</span>
+            </div>
+            <sc-for list="{{ tagihan }}" as="t" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:2.2fr 1.3fr 1.3fr 1fr;padding:16px 22px;border-top:1px solid #f4f6f8;font-size:13.5px;color:#33404d;align-items:center">
+                <span style="font-weight:600">{{ t.nama }}</span>
+                <span>{{ t.kelas }}</span>
+                <span>{{ t.nominal }}</span>
+                <span style="display:inline-flex;width:fit-content;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;background:{{ t.statusBg }};color:{{ t.statusColor }}">{{ t.status }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isEspp }}" hint-placeholder-val="{{ false }}" invert="true">
+          <div style="background:#fff;border-radius:14px;border:1px solid #eef1f4;padding:64px 32px;text-align:center">
+            <div style="width:64px;height:64px;border-radius:50%;background:{{ selected.color }};display:flex;align-items:center;justify-content:center;margin:0 auto 20px;opacity:0.85">
+              <span style="font:700 16px 'Poppins',sans-serif;color:#fff">{{ selected.initials }}</span>
+            </div>
+            <h2 style="font-size:18px;font-weight:700;color:#212b36;margin:0 0 8px">Modul {{ selected.name }}</h2>
+            <p style="font-size:13.5px;color:#8a94a0;margin:0 0 4px;max-width:360px;margin-left:auto;margin-right:auto">Halaman detail modul ini sedang dalam pengembangan. Contoh tampilan detail lengkap tersedia di modul e-SPP.</p>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    screen: 'login',
+    email: '',
+    showError: false,
+    selectedKey: null
+  };
+
+  moduleDefs = [
+    { key: 'sianggar', name: 'Sianggar', initials: 'SG', color: '#3E7CB1', bg: '#eef4f9', shadow: 'rgba(62,124,177,0.35)', tagline: 'Sistem Informasi Anggaran' },
+    { key: 'simaya', name: 'Simaya', initials: 'SM', color: '#4CAF7D', bg: '#eef8f2', shadow: 'rgba(76,175,125,0.35)', tagline: 'Sistem Informasi Manajemen Aset' },
+    { key: 'simonas', name: 'Simonas', initials: 'SN', color: '#9C5FC0', bg: '#f8f0fb', shadow: 'rgba(156,95,192,0.35)', tagline: 'Sistem Informasi Monitoring Nasional' },
+    { key: 'simoy', name: 'Simoy', initials: 'SY', color: '#5C6BC0', bg: '#eef0fb', shadow: 'rgba(92,107,192,0.35)', tagline: 'Sistem Informasi Mobilitas Yayasan' },
+    { key: 'sekolah', name: 'Sekolah', initials: 'SK', color: '#D9534F', bg: '#fbeeed', shadow: 'rgba(217,83,79,0.35)', tagline: 'Data & Profil Sekolah' },
+    { key: 'espp', name: 'e-SPP', initials: 'SP', color: '#E0A527', bg: '#fdf6e8', shadow: 'rgba(224,165,39,0.35)', tagline: 'Sistem Pembayaran SPP Digital' },
+    { key: 'pmb', name: 'PMB', initials: 'PM', color: '#1F6FA6', bg: '#eaf3fa', shadow: 'rgba(31,111,166,0.35)', tagline: 'Penerimaan Murid Baru' },
+    { key: 'lms', name: 'LMS', initials: 'LM', color: '#7A5230', bg: '#f5efe9', shadow: 'rgba(122,82,48,0.3)', tagline: 'Learning Management System' },
+    { key: 'arsip', name: 'Arsip Digital', initials: 'AD', color: '#6D4E9C', bg: '#f2eefa', shadow: 'rgba(109,78,156,0.3)', tagline: 'Manajemen Dokumen & Arsip' },
+    { key: 'kolaborasi', name: 'Ruang Kolaborasi', initials: 'RK', color: '#2E8B57', bg: '#eaf7f0', shadow: 'rgba(46,139,87,0.3)', tagline: 'Ruang Kerja & Diskusi Tim' },
+    { key: 'sdm', name: 'SDM / HR', initials: 'HR', color: '#1c1c1e', bg: '#f1f1f2', shadow: 'rgba(28,28,30,0.3)', tagline: 'Sumber Daya Manusia' },
+    { key: 'lainnya', name: 'Aplikasi Lainnya', initials: '···', color: '#2FA8B0', bg: '#eaf7f8', shadow: 'rgba(47,168,176,0.3)', tagline: 'Integrasi Aplikasi Tambahan' }
+  ];
+
+  tagihanData = [
+    { nama: 'Ahmad Fauzan', kelas: 'X IPA 1', nominal: 'Rp 850.000', status: 'Lunas', statusBg: '#e7f6ee', statusColor: '#1f8a5b' },
+    { nama: 'Siti Nur Aini', kelas: 'XI IPS 2', nominal: 'Rp 850.000', status: 'Lunas', statusBg: '#e7f6ee', statusColor: '#1f8a5b' },
+    { nama: 'Muhammad Rizky', kelas: 'X IPA 3', nominal: 'Rp 850.000', status: 'Belum Bayar', statusBg: '#fdeceb', statusColor: '#d64545' },
+    { nama: 'Nabila Putri', kelas: 'XII IPA 1', nominal: 'Rp 850.000', status: 'Menunggu Verifikasi', statusBg: '#fdf3e3', statusColor: '#b3811f' },
+    { nama: 'Dimas Prasetyo', kelas: 'XI IPA 2', nominal: 'Rp 850.000', status: 'Lunas', statusBg: '#e7f6ee', statusColor: '#1f8a5b' }
+  ];
+
+  isValidEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  }
+
+  onEmailChange = (e) => {
+    this.setState({ email: e.target.value, showError: false });
+  };
+
+  onEmailKeyDown = (e) => {
+    if (e.key === 'Enter') this.onSubmit();
+  };
+
+  onSubmit = () => {
+    if (this.isValidEmail(this.state.email)) {
+      this.setState({ screen: 'dashboard', showError: false });
+    } else {
+      this.setState({ showError: true });
+    }
+  };
+
+  onLogout = () => {
+    this.setState({ screen: 'login', email: '', selectedKey: null, showError: false });
+  };
+
+  onBack = () => {
+    this.setState({ screen: 'dashboard', selectedKey: null });
+  };
+
+  selectModule = (key) => {
+    this.setState({ screen: 'detail', selectedKey: key });
+  };
+
+  renderVals() {
+    const { screen, email, showError, selectedKey } = this.state;
+    const modules = this.moduleDefs.map(m => ({
+      ...m,
+      onClick: () => this.selectModule(m.key)
+    }));
+    const selected = this.moduleDefs.find(m => m.key === selectedKey) || this.moduleDefs[5];
+    const initials = email && email.length > 0 ? email.trim()[0].toUpperCase() : 'U';
+
+    return {
+      isLogin: screen === 'login',
+      isDashboard: screen === 'dashboard',
+      isDetail: screen === 'detail',
+      isEspp: selected.key === 'espp',
+      email,
+      showError,
+      buttonBg: this.isValidEmail(email) ? '#2E6DA4' : '#9db8cd',
+      onEmailChange: this.onEmailChange,
+      onEmailKeyDown: this.onEmailKeyDown,
+      onSubmit: this.onSubmit,
+      onLogout: this.onLogout,
+      onBack: this.onBack,
+      initials,
+      modules,
+      selected,
+      tagihan: this.tagihanData
+    };
+  }
+}
+</script>
+</body>
+</html>

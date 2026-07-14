@@ -60,6 +60,7 @@ export type SummaryCard = {
   status: 'ok' | 'warning' | 'critical' | 'degraded'
   headline: string | null
   metrics: { label: string; value: string | number }[]
+  details: Record<string, unknown>
   fetched_at: string | null
   can_act: boolean
 }
@@ -70,8 +71,28 @@ export type Me = {
     full_name: string
     primary_email: string
     status: 'active' | 'pending' | 'suspended'
+    is_admin: boolean
   }
   app_access: unknown[]
+}
+
+export type AdminUser = {
+  id: string
+  full_name: string
+  primary_email: string
+  status: 'active' | 'pending' | 'suspended'
+  is_admin: boolean
+}
+
+export type AdminApp = { id: string; code: string; name: string }
+
+export type AdminGrant = {
+  id: string
+  user_id: string
+  app_id: string
+  yayasan_role: 'bph' | 'pembina' | 'pengawas' | 'app_admin'
+  can_act: boolean
+  app: AdminApp
 }
 
 export const api = {
@@ -81,4 +102,11 @@ export const api = {
   handoff: (code: string, path?: string) =>
     request<{ redirect_url: string }>(`/api/apps/${code}/handoff${path ? `?path=${encodeURIComponent(path)}` : ''}`),
   logout: () => request('/api/auth/logout', { method: 'POST' }),
+
+  adminUsers: () => request<AdminUser[]>('/api/admin/users'),
+  adminApps: () => request<AdminApp[]>('/api/admin/apps'),
+  adminGrants: (userId: string) => request<AdminGrant[]>(`/api/admin/access?user_id=${userId}`),
+  adminGrant: (payload: { user_id: string; app_id: string; yayasan_role: AdminGrant['yayasan_role']; can_act: boolean }) =>
+    request<AdminGrant>('/api/admin/access', { method: 'POST', body: JSON.stringify(payload) }),
+  adminRevoke: (grantId: string) => request(`/api/admin/access/${grantId}`, { method: 'DELETE' }),
 }

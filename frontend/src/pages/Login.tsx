@@ -1,32 +1,47 @@
 import { googleLoginUrl } from '../lib/api'
+import LogoMark from '../components/LogoMark'
+import HeroPattern from '../components/HeroPattern'
 
 export default function Login() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-8 px-6 text-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-lg font-bold text-paper">
-          Y
+    <div className="flex min-h-svh flex-col bg-surface md:flex-row">
+      <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-accent-deep via-accent-mid to-accent px-8 py-16 text-center text-white md:flex-[1.1] md:px-14">
+        <HeroPattern />
+        <div className="relative z-10 max-w-sm">
+          <LogoMark size="lg" className="mx-auto mb-7" />
+          <h1 className="font-display text-2xl font-bold leading-snug md:text-3xl">
+            Satu Aplikasi, Semua Layanan Yayasan
+          </h1>
+          <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-white/75">
+            Yapinet menghubungkan akademik, keuangan, SDM, dan operasional dalam satu ekosistem super app.
+          </p>
         </div>
-        <h1 className="text-2xl font-semibold text-ink">Yapinet</h1>
-        <p className="max-w-xs text-sm text-ink-soft">
-          Portal pengawasan lintas unit untuk BPH, Pembina, dan Pengawas Yayasan.
-        </p>
+        <p className="absolute bottom-8 text-[11px] text-white/50">© 2026 Yayasan — Yapinet</p>
       </div>
 
-      <a
-        href={googleLoginUrl()}
-        className="flex items-center gap-3 rounded-full border border-line bg-white px-6 py-3 text-sm font-medium text-ink shadow-sm transition hover:shadow-md"
-      >
-        <GoogleIcon />
-        Masuk dengan Google
-      </a>
+      <div className="flex flex-1 flex-col justify-center px-6 py-10 md:px-16">
+        <div className="mx-auto w-full max-w-sm">
+          <h2 className="font-display text-xl font-bold text-ink">Masuk ke Yapinet</h2>
+          <p className="mt-1 text-sm text-ink-soft">Gunakan akun Google institusi Anda untuk melanjutkan.</p>
+
+          <a
+            href={googleLoginUrl()}
+            className="tap-scale mt-7 flex items-center justify-center gap-3 rounded-xl border border-line bg-surface px-5 py-4 shadow-sm"
+          >
+            <GoogleIcon />
+            <span className="text-sm font-semibold text-ink">Masuk dengan Google</span>
+          </a>
+
+          <p className="mt-7 text-center text-xs text-ink-faint">Butuh bantuan akses? Hubungi Admin Yayasan.</p>
+        </div>
+      </div>
     </div>
   )
 }
 
 function GoogleIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 18 18" aria-hidden="true">
       <path
         fill="#4285F4"
         d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.56 2.7-3.86 2.7-6.62z"

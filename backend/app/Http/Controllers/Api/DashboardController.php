@@ -39,12 +39,28 @@ class DashboardController extends Controller
                 'status' => $cache->isStale() ? 'degraded' : $cache->status,
                 'headline' => $cache->headline,
                 'metrics' => $cache->metrics,
+                'details' => $cache->details ?? [],
                 'fetched_at' => $cache->fetched_at,
                 'can_act' => $grant->can_act,
             ]);
         });
 
-        return response()->json(['cards' => $cards->values()]);
+        return response()->json(['cards' => self::sortByMenuOrder($cards)->values()]);
+    }
+
+    /**
+     * Urutan menu tetap: Sianggar, Simaya, Simonik, Simonas, SiHaris, Simoy,
+     * lalu sisanya — tidak mengandalkan urutan pembuatan UserAppAccess.
+     */
+    private static function sortByMenuOrder($cards)
+    {
+        $order = ['SNGR', 'SMYA', 'SMNK', 'SMNS', 'SHRS', 'SMOY', 'ESPP', 'PMB', 'ARSD', 'SKLH', 'FRNT'];
+
+        return $cards->sortBy(function (array $card) use ($order) {
+            $index = array_search($card['app_code'], $order, true);
+
+            return $index === false ? count($order) : $index;
+        });
     }
 
     public function refresh(Request $request, string $code, AppAdapterResolver $resolver): JsonResponse
@@ -68,6 +84,7 @@ class DashboardController extends Controller
                 'status' => $result->status,
                 'headline' => $result->headline,
                 'metrics' => $result->metrics,
+                'details' => $result->details,
                 'fetched_at' => now(),
                 'expires_at' => now()->addSeconds($app->cache_ttl_seconds),
             ]

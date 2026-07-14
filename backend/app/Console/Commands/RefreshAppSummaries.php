@@ -48,6 +48,7 @@ class RefreshAppSummaries extends Command
                         'status' => $result->status,
                         'headline' => $result->headline,
                         'metrics' => $result->metrics,
+                        'details' => $result->details,
                         'fetched_at' => now(),
                         'expires_at' => now()->addSeconds($app->cache_ttl_seconds),
                     ]

@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import AuthCallback from './pages/AuthCallback'
 import Dashboard from './pages/Dashboard'
+import AppDetail from './pages/AppDetail'
+import Settings from './pages/Settings'
 
 const queryClient = new QueryClient()
 
@@ -34,6 +36,22 @@ function App() {
               element={
                 <RequireAuth>
                   <Dashboard />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <RequireAuth>
+                  <Settings />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/:slug"
+              element={
+                <RequireAuth>
+                  <AppDetail />
                 </RequireAuth>
               }
             />

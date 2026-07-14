@@ -14,7 +14,7 @@ class YapinetApp extends Model
     protected $table = 'apps';
 
     protected $fillable = [
-        'code', 'name', 'icon_url', 'base_url',
+        'code', 'name', 'icon_url', 'base_url', 'public_url',
         'summary_endpoint', 'sso_endpoint', 'cache_ttl_seconds', 'is_active',
     ];
 

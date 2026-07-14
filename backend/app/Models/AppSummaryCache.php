@@ -13,13 +13,14 @@ class AppSummaryCache extends Model
     protected $table = 'app_summary_cache';
 
     protected $fillable = [
-        'app_id', 'unit_id', 'status', 'headline', 'metrics', 'fetched_at', 'expires_at',
+        'app_id', 'unit_id', 'status', 'headline', 'metrics', 'details', 'fetched_at', 'expires_at',
     ];
 
     protected function casts(): array
     {
         return [
             'metrics' => 'array',
+            'details' => 'array',
             'fetched_at' => 'datetime',
             'expires_at' => 'datetime',
         ];
