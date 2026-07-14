@@ -28,7 +28,9 @@ type Penyusutan = {
   penyusutan_per_tahun: number
 }
 
-type ByUnit = { unit: string; jumlah_aset: number; nilai_total_aset: number }
+type ByUnit = { unit: string; jumlah_aset: number; nilai_total_aset: number; lokasi_count: number }
+
+const PAGE_SIZE = 10
 
 export default function SimayaDetail({ cards }: { cards: SummaryCard[] }) {
   const details = cards[0]?.details ?? {}
@@ -51,15 +53,25 @@ export default function SimayaDetail({ cards }: { cards: SummaryCard[] }) {
   }, [sampleAsetRusak, byUnit])
 
   const [unit, setUnit] = useState('all')
+  const [rusakVisible, setRusakVisible] = useState(PAGE_SIZE)
+  const [penyusutanVisible, setPenyusutanVisible] = useState(PAGE_SIZE)
 
   const selectedUnitStats = unit !== 'all' ? byUnit.find((u) => u.unit === unit) : undefined
   const jumlahAset = unit === 'all' ? defaultJumlahAset : selectedUnitStats?.jumlah_aset ?? 0
   const nilaiTotalAset = unit === 'all' ? defaultNilaiTotalAset : selectedUnitStats?.nilai_total_aset ?? 0
 
-  const asetRusak = sampleAsetRusak.filter((a) => unit === 'all' || a.unit === unit)
-  const penyusutan = samplePenyusutan.filter((a) => unit === 'all' || a.unit === unit)
-  const totalNilaiAwal = penyusutan.reduce((sum, a) => sum + a.nilai_awal, 0)
-  const totalNilaiSekarang = penyusutan.reduce((sum, a) => sum + a.nilai_sekarang, 0)
+  const asetRusakAll = sampleAsetRusak.filter((a) => unit === 'all' || a.unit === unit)
+  const penyusutanAll = samplePenyusutan.filter((a) => unit === 'all' || a.unit === unit)
+  const asetRusak = asetRusakAll.slice(0, rusakVisible)
+  const penyusutan = penyusutanAll.slice(0, penyusutanVisible)
+  const totalNilaiAwal = penyusutanAll.reduce((sum, a) => sum + a.nilai_awal, 0)
+  const totalNilaiSekarang = penyusutanAll.reduce((sum, a) => sum + a.nilai_sekarang, 0)
+
+  const changeUnit = (value: string) => {
+    setUnit(value)
+    setRusakVisible(PAGE_SIZE)
+    setPenyusutanVisible(PAGE_SIZE)
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -68,7 +80,7 @@ export default function SimayaDetail({ cards }: { cards: SummaryCard[] }) {
         <label className="block text-xs font-semibold uppercase tracking-wide text-ink-faint">Filter Unit</label>
         <select
           value={unit}
-          onChange={(e) => setUnit(e.target.value)}
+          onChange={(e) => changeUnit(e.target.value)}
           className="mt-1.5 w-full max-w-xs rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink sm:w-auto"
         >
           <option value="all">Semua Unit</option>
@@ -93,8 +105,12 @@ export default function SimayaDetail({ cards }: { cards: SummaryCard[] }) {
             <p className="mt-1 text-lg font-bold text-ink">{formatRupiah(nilaiTotalAset)}</p>
           </div>
           <div className="rounded-xl bg-surface-soft p-3.5">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">Unit Tercakup</p>
-            <p className="mt-1 text-lg font-bold text-ink">{unit === 'all' ? byUnit.length : selectedUnitStats ? 1 : 0}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
+              {unit === 'all' ? 'Unit Tercakup' : 'Jumlah Lokasi/Ruangan'}
+            </p>
+            <p className="mt-1 text-lg font-bold text-ink">
+              {unit === 'all' ? byUnit.length : selectedUnitStats?.lokasi_count ?? 0}
+            </p>
           </div>
         </div>
       </div>
@@ -135,6 +151,14 @@ export default function SimayaDetail({ cards }: { cards: SummaryCard[] }) {
             </tbody>
           </table>
         </div>
+        {rusakVisible < asetRusakAll.length && (
+          <button
+            onClick={() => setRusakVisible((n) => n + PAGE_SIZE)}
+            className="mt-3 w-full rounded-lg border border-line py-2 text-xs font-semibold text-ink hover:bg-surface-soft"
+          >
+            Tampilkan lebih banyak ({asetRusakAll.length - rusakVisible} lagi)
+          </button>
+        )}
       </div>
 
       {/* Data Penyusutan Aset */}
@@ -181,6 +205,14 @@ export default function SimayaDetail({ cards }: { cards: SummaryCard[] }) {
             </tbody>
           </table>
         </div>
+        {penyusutanVisible < penyusutanAll.length && (
+          <button
+            onClick={() => setPenyusutanVisible((n) => n + PAGE_SIZE)}
+            className="mt-3 w-full rounded-lg border border-line py-2 text-xs font-semibold text-ink hover:bg-surface-soft"
+          >
+            Tampilkan lebih banyak ({penyusutanAll.length - penyusutanVisible} lagi)
+          </button>
+        )}
       </div>
     </div>
   )
