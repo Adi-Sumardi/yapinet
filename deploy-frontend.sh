@@ -30,6 +30,10 @@ HOSTINGER_SSH="${HOSTINGER_SSH:-u000000000@yapinet.id}"
 HOSTINGER_PORT="${HOSTINGER_PORT:-65002}"                       # port SSH Hostinger biasanya bukan 22, cek di hPanel
 HOSTINGER_PATH="${HOSTINGER_PATH:-domains/yapinet.id/public_html}"
 API_URL="${API_URL:-https://api.yapinet.id}"
+SSH_KEY="${SSH_KEY:-}"                                          # opsional: path private key kalau bukan default ~/.ssh/id_*
+
+SSH_CMD="ssh -p $HOSTINGER_PORT"
+[ -n "$SSH_KEY" ] && SSH_CMD="ssh -p $HOSTINGER_PORT -i $SSH_KEY"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/frontend"
@@ -53,9 +57,15 @@ if [ ! -d dist ]; then
     exit 1
 fi
 
-# ── 3. Upload lewat rsync (hapus file lama yang sudah tidak ada di build baru) ──
-echo "🚀  [3/3] rsync dist/ -> server..."
-rsync -avz --delete -e "ssh -p $HOSTINGER_PORT" dist/ "$HOSTINGER_SSH:$HOSTINGER_PATH/"
+# ── 3. Upload lewat rsync ─────────────────────────────────────────────────────
+# SENGAJA TANPA --delete: HOSTINGER_PATH (public_html domain utama) sering
+# berbagi folder dengan clone backend Laravel (mis. public_html/yapinet/) di
+# layout Hostinger ini — --delete pernah menghapus seluruh folder itu (bukan
+# bagian dari dist/) karena rsync menganggapnya "file basi". Kalau memang mau
+# bersih-bersih file lama punya build FE sebelumnya, hapus manual/spesifik di
+# server, jangan pakai --delete di sini.
+echo "🚀  [3/3] rsync dist/ -> server (tanpa --delete, lihat komentar di atas)..."
+rsync -avz -e "$SSH_CMD" dist/ "$HOSTINGER_SSH:$HOSTINGER_PATH/"
 echo ""
 
 echo "✅  Deploy frontend selesai! Cek https://yapinet.id"
