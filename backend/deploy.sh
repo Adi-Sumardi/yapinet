@@ -11,10 +11,9 @@
 #   2. File .env sudah ada di ~/yapinet/backend (isi dari .env.example,
 #      APP_URL=https://api.yapinet.id, FRONTEND_URL=https://yapinet.id,
 #      SANCTUM_STATEFUL_DOMAINS=yapinet.id, DB_* sesuai database MySQL
-#      yang dibuat di hPanel, GOOGLE_CLIENT_ID/SECRET, dan
-#      GOOGLE_REDIRECT_URI=https://api.yapinet.id/api/auth/google/callback
-#      — juga didaftarkan sebagai Authorized redirect URI di Google Cloud
-#      Console.
+#      yang dibuat di hPanel. Opsional: YAPINET_DEFAULT_PASSWORD (default
+#      "Yapinet@2026") — password awal semua user sebelum ganti password
+#      sendiri, lihat migration add_password_to_users_table.
 #   3. Cron Job hPanel terpasang (sekali saja, bukan tiap deploy):
 #        * * * * * php /home/USERNAME/yapinet/backend/artisan schedule:run >> /dev/null 2>&1
 #
@@ -90,8 +89,18 @@ $PHP artisan view:cache
 echo ""
 
 # ── 6. Storage link (idempotent) ─────────────────────────────────────────────
-echo "🔗  [6/6] Storage link..."
+echo "🔗  [6/7] Storage link..."
 $PHP artisan storage:link --quiet 2>/dev/null || true
+echo ""
+
+# ── 7. Passport encryption keys (sekali saja — regenerasi ulang akan
+#      me-invalidate semua access token OAuth aplikasi anak yang aktif) ──────
+if [ ! -f storage/oauth-private.key ]; then
+    echo "🔑  [7/7] Generate Passport encryption keys (baru pertama kali)..."
+    $PHP artisan passport:keys
+else
+    echo "⏭️   [7/7] Passport encryption keys sudah ada, skip."
+fi
 echo ""
 
 echo "✅  Deploy backend selesai! Cek https://api.yapinet.id/up untuk health check."

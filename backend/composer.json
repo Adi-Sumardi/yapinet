@@ -9,6 +9,7 @@
         "php": "^8.3",
         "guzzlehttp/guzzle": "^7.14",
         "laravel/framework": "^13.8",
+        "laravel/passport": "^13.7",
         "laravel/sanctum": "^4.3",
         "laravel/socialite": "^5.28",
         "laravel/tinker": "^3.0"

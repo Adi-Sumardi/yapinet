@@ -54,8 +54,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    // URL PWA Yapinet (mis. https://yapinet.id) — tempat AuthController
-    // mengarahkan browser setelah login Google berhasil.
+    // URL PWA Yapinet (mis. https://yapinet.id).
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
 
     /*

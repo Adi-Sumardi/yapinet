@@ -8,6 +8,7 @@ use App\Models\UserAppAccess;
 use App\Models\YapinetApp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * Panel "Kelola Hak Akses" di halaman Pengaturan — implementasi FR-08
@@ -21,6 +22,24 @@ class AccessController extends Controller
         return response()->json(
             User::orderBy('full_name')->get(['id', 'full_name', 'primary_email', 'status', 'is_admin'])
         );
+    }
+
+    public function storeUser(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'full_name' => 'required|string|max:255',
+            'primary_email' => ['required', 'email', Rule::unique('users', 'primary_email')],
+        ]);
+
+        $user = User::create([
+            'full_name' => $data['full_name'],
+            'primary_email' => $data['primary_email'],
+            'password' => config('yapinet.default_password'),
+            'must_change_password' => true,
+            'status' => 'active',
+        ]);
+
+        return response()->json($user->only(['id', 'full_name', 'primary_email', 'status', 'is_admin']), 201);
     }
 
     public function apps(): JsonResponse

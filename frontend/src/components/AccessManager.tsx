@@ -15,8 +15,22 @@ export default function AccessManager() {
   const queryClient = useQueryClient()
   const [selectedUserId, setSelectedUserId] = useState('')
   const [rows, setRows] = useState<Record<string, RowState>>({})
+  const [newUserName, setNewUserName] = useState('')
+  const [newUserEmail, setNewUserEmail] = useState('')
+  const [createError, setCreateError] = useState<string | null>(null)
 
   const usersQuery = useQuery({ queryKey: ['admin-users'], queryFn: api.adminUsers })
+
+  const createUserMutation = useMutation({
+    mutationFn: () => api.adminCreateUser({ full_name: newUserName, primary_email: newUserEmail }),
+    onSuccess: () => {
+      setNewUserName('')
+      setNewUserEmail('')
+      setCreateError(null)
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
+    onError: () => setCreateError('Gagal menambah pengguna. Periksa email (mungkin sudah dipakai).'),
+  })
   const appsQuery = useQuery({ queryKey: ['admin-apps'], queryFn: api.adminApps })
   const grantsQuery = useQuery({
     queryKey: ['admin-grants', selectedUserId],
@@ -60,11 +74,52 @@ export default function AccessManager() {
   return (
     <div className="rounded-2xl border border-line-soft bg-surface p-5">
       <h2 className="font-display text-base font-bold text-ink">Kelola Hak Akses</h2>
-      <p className="mt-1 text-sm text-ink-soft">
-        Atur aplikasi apa saja yang bisa dilihat tiap pengguna yang login dengan Google.
-      </p>
+      <p className="mt-1 text-sm text-ink-soft">Atur aplikasi apa saja yang bisa dilihat tiap pengguna.</p>
 
-      <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-ink-faint">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          createUserMutation.mutate()
+        }}
+        className="mt-5 flex flex-wrap items-end gap-2.5 rounded-xl border border-line-soft bg-surface-soft p-3.5"
+      >
+        <div className="flex-1">
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-faint">
+            Nama Lengkap
+          </label>
+          <input
+            required
+            value={newUserName}
+            onChange={(e) => setNewUserName(e.target.value)}
+            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink"
+            placeholder="Nama pengguna baru"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-faint">Email</label>
+          <input
+            type="email"
+            required
+            value={newUserEmail}
+            onChange={(e) => setNewUserEmail(e.target.value)}
+            className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink"
+            placeholder="nama@yayasan.id"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={createUserMutation.isPending}
+          className="tap-scale rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white disabled:opacity-60"
+        >
+          Tambah Pengguna
+        </button>
+        {createError && <p className="w-full text-xs text-red-600">{createError}</p>}
+        <p className="w-full text-xs text-ink-faint">
+          Pengguna baru mendapat password default dan wajib menggantinya di login pertama.
+        </p>
+      </form>
+
+      <label className="mt-5 block text-xs font-semibold uppercase tracking-wide text-ink-faint">
         Pilih pengguna
       </label>
       <select
