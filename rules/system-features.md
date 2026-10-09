@@ -269,7 +269,7 @@ merusak fase sebelumnya.
 - Prettier + Laravel Pint + `.editorconfig` (lint frontend: oxlint yang sudah ada).
 - Hentikan auto-grant di setiap login (pindah ke "sekali saat dibuat" — `Actions/GrantDefaultAccess`).
 
-### Fase 1 — Fondasi backend
+### Fase 1 — Fondasi backend ✅ selesai 2026-10-09
 - Migrasi skema `apps` baru + `settings` (lihat `database.md`), migrasi data
   dari kolom lama.
 - `SettingsService` + `config/settings.php` + endpoint settings.

@@ -49,6 +49,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     throw new ApiError(response.status, body.message ?? 'Terjadi kesalahan.')
   }
 
+  if (response.status === 204) {
+    return undefined as T
+  }
+
   return response.json() as Promise<T>
 }
 
@@ -90,8 +94,6 @@ export type AdminGrant = {
   id: string
   user_id: string
   app_id: string
-  yayasan_role: 'bph' | 'pembina' | 'pengawas' | 'app_admin'
-  can_act: boolean
   app: AdminApp
 }
 
@@ -103,17 +105,16 @@ export const api = {
     request<{ redirect_url: string }>(`/api/apps/${code}/handoff${path ? `?path=${encodeURIComponent(path)}` : ''}`),
   logout: () => request('/api/auth/logout', { method: 'POST' }),
 
-  adminUsers: () => request<AdminUser[]>('/api/admin/users'),
+  adminUsers: () => request<{ data: AdminUser[] }>('/api/admin/users?per_page=100').then((r) => r.data),
   adminCreateUser: (payload: { full_name: string; primary_email: string }) =>
     request<AdminUser>('/api/admin/users', { method: 'POST', body: JSON.stringify(payload) }),
   adminDeleteUser: (userId: string) => request(`/api/admin/users/${userId}`, { method: 'DELETE' }),
-  adminApps: () => request<AdminApp[]>('/api/admin/apps'),
+  adminApps: () =>
+    request<{ data: (AdminApp & { is_active: boolean })[] }>('/api/admin/apps').then((r) =>
+      r.data.filter((app) => app.is_active),
+    ),
   adminGrants: (userId: string) => request<AdminGrant[]>(`/api/admin/access?user_id=${userId}`),
-  adminGrant: (payload: {
-    user_id: string
-    app_id: string
-    yayasan_role: AdminGrant['yayasan_role']
-    can_act: boolean
-  }) => request<AdminGrant>('/api/admin/access', { method: 'POST', body: JSON.stringify(payload) }),
+  adminGrant: (payload: { user_id: string; app_id: string }) =>
+    request<AdminGrant>('/api/admin/access', { method: 'POST', body: JSON.stringify(payload) }),
   adminRevoke: (grantId: string) => request(`/api/admin/access/${grantId}`, { method: 'DELETE' }),
 }

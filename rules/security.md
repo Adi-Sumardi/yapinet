@@ -47,7 +47,7 @@ pembatasan, URL itu bisa diarahkan ke layanan internal hosting. Aturan
 - Wajib `https://` (pengecualian `http://localhost`/`127.0.0.1` hanya saat `APP_ENV=local`).
 - Resolve DNS host → tolak bila IP privat/loopback/link-local/metadata
   (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `127.0.0.0/8`, `169.254.0.0/16`, `::1`, `fc00::/7`).
-- Tidak mengikuti redirect ke host lain (`allow_redirects` maks 3, host harus tetap aman).
+- **Tidak mengikuti redirect sama sekali** (`allow_redirects: false`) dan koneksi dikunci ke IP yang lolos validasi (`CURLOPT_RESOLVE`) untuk mencegah DNS rebinding.
 - Timeout dari pengaturan (default 5 dtk), ukuran respons maks 512 KB.
 - Tes Koneksi hanya untuk admin, rate limit 10×/menit.
 

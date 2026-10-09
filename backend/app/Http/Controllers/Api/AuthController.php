@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\AuditLog;
 use App\Models\UserAppAccess;
+use App\Services\AuditLogger;
 use App\Services\GoogleAccountResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -24,7 +24,7 @@ class AuthController extends Controller
             ->redirect();
     }
 
-    public function callback(GoogleAccountResolver $resolver): RedirectResponse
+    public function callback(GoogleAccountResolver $resolver, AuditLogger $audit): RedirectResponse
     {
         $frontendUrl = rtrim(config('app.frontend_url'), '/');
 
@@ -37,14 +37,12 @@ class AuthController extends Controller
         $user = $resolver->resolve($googleUser);
 
         if (is_string($user)) {
+            $audit->log(null, 'auth.login_rejected', metadata: ['email' => $googleUser->getEmail(), 'reason' => $user]);
+
             return redirect()->away("{$frontendUrl}/login?error={$user}");
         }
 
-        AuditLog::create([
-            'user_id' => $user->id,
-            'action' => 'login',
-            'metadata' => ['via' => 'google'],
-        ]);
+        $audit->log($user, 'auth.login', metadata: ['via' => 'google']);
 
         $token = $user->createToken('yapinet-pwa')->plainTextToken;
 
@@ -71,9 +69,10 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request, AuditLogger $audit): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
+        $audit->log($request->user(), 'auth.logout');
 
         return response()->json(['message' => 'Logged out.']);
     }

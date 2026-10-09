@@ -31,6 +31,7 @@ class AuditLog extends Model
 
     public function app(): BelongsTo
     {
-        return $this->belongsTo(YapinetApp::class, 'app_id');
+        // withTrashed: log tetap menampilkan nama menu yang sudah dihapus.
+        return $this->belongsTo(YapinetApp::class, 'app_id')->withTrashed();
     }
 }

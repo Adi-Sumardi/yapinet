@@ -96,10 +96,10 @@ Contoh `GET /api/menu`:
 | GET | `/api/admin/apps` | semua menu termasuk nonaktif, + status koneksi terakhir |
 | POST | `/api/admin/apps` | buat menu |
 | GET | `/api/admin/apps/{app}` | detail menu (tanpa secret) |
-| PUT | `/api/admin/apps/{app}` | ubah menu (`api_key` kosong = tidak diubah, `null` eksplisit = hapus key) |
+| PUT | `/api/admin/apps/{app}` | ubah menu (field `api_key` tidak dikirim = tidak diubah; `remove_api_key: true` = hapus key) |
 | DELETE | `/api/admin/apps/{app}` | soft delete |
 | POST | `/api/admin/apps/reorder` | `{ "ids": ["uuid", ...] }` urutan baru |
-| POST | `/api/admin/apps/test-connection` | tes URL API dari isi form (belum disimpan) |
+| POST | `/api/admin/apps/test-connection` | tes URL API dari isi form (belum disimpan); `app_id` opsional untuk memakai key tersimpan |
 | POST | `/api/admin/apps/{app}/refresh` | refresh ringkasan sekarang |
 | GET | `/api/admin/users` | daftar user (`?search=&status=&page=`) |
 | POST | `/api/admin/users` | tambah user (nama, email, is_admin) |
@@ -111,6 +111,7 @@ Contoh `GET /api/menu`:
 | PUT | `/api/admin/settings` | `{ "values": { "branding.app_name": "..." } }` |
 | DELETE | `/api/admin/settings/{key}` | kembalikan ke default |
 | GET | `/api/admin/audit-logs` | log (`?action=&user_id=&from=&to=&page=`) |
+| POST | `/api/admin/uploads/image` | upload ikon/logo (png/jpg/webp ≤ 512 KB) → `{ data: { url } }` |
 
 Path lama (`/api/dashboard/summary`, `/api/admin/access`, `/api/apps/{code}/handoff`)
 dipertahankan sampai frontend baru live, lalu dihapus.

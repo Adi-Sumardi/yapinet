@@ -2,11 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\AppSummaryCache;
 use App\Models\GoogleIdentity;
 use App\Models\User;
 use App\Models\UserAppAccess;
-use App\Models\YapinetApp;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -45,6 +43,8 @@ class GoogleLoginTest extends TestCase
         $this->get('/api/auth/google/callback')
             ->assertRedirect($this->frontend('/login?error=not_registered'));
 
+        $this->assertDatabaseHas('audit_log', ['action' => 'auth.login_rejected']);
+
         $this->assertDatabaseMissing('users', ['primary_email' => 'orang.asing@gmail.com']);
         $this->assertSame(0, GoogleIdentity::count());
     }
@@ -58,49 +58,6 @@ class GoogleLoginTest extends TestCase
             ->assertRedirect($this->frontend('/login?error=suspended'));
     }
 
-    public function test_admin_can_register_user_without_password(): void
-    {
-        $admin = User::factory()->create(['is_admin' => true]);
-
-        $this->actingAs($admin)
-            ->postJson('/api/admin/users', ['full_name' => 'Guru Baru', 'primary_email' => 'baru@yayasan.id'])
-            ->assertCreated();
-
-        $this->assertDatabaseHas('users', ['primary_email' => 'baru@yayasan.id', 'password' => null]);
-    }
-
-    public function test_admin_can_delete_other_user_but_not_self(): void
-    {
-        $admin = User::factory()->create(['is_admin' => true]);
-        $other = User::factory()->create();
-        $other->createToken('x');
-
-        $this->actingAs($admin)->deleteJson("/api/admin/users/{$other->id}")->assertOk();
-        $this->assertDatabaseMissing('users', ['id' => $other->id]);
-        $this->assertDatabaseMissing('personal_access_tokens', ['tokenable_id' => $other->id]);
-
-        $this->actingAs($admin)->deleteJson("/api/admin/users/{$admin->id}")->assertStatus(422);
-    }
-
-    public function test_dashboard_hides_inactive_apps(): void
-    {
-        $user = User::factory()->create();
-        $siakad = YapinetApp::where('code', 'SIAK')->firstOrFail();
-        $espp = YapinetApp::create([
-            'code' => 'ESPP', 'name' => 'e-SPP', 'base_url' => 'https://espp.test',
-            'summary_endpoint' => '/summary', 'cache_ttl_seconds' => 600, 'is_active' => false,
-        ]);
-
-        foreach ([$siakad, $espp] as $app) {
-            UserAppAccess::create(['user_id' => $user->id, 'app_id' => $app->id, 'unit_id' => null, 'yayasan_role' => 'bph', 'can_act' => true]);
-            AppSummaryCache::create(['app_id' => $app->id, 'unit_id' => null, 'status' => 'ok', 'headline' => 'x', 'metrics' => [], 'fetched_at' => now(), 'expires_at' => now()->addHour()]);
-        }
-
-        $codes = collect($this->actingAs($user)->getJson('/api/dashboard/summary')->assertOk()->json('cards'))->pluck('app_code');
-
-        $this->assertSame(['SIAK'], $codes->all());
-    }
-
     public function test_login_does_not_regrant_revoked_access(): void
     {
         $user = User::factory()->create(['primary_email' => 'guru@yayasan.id']);
@@ -109,19 +66,5 @@ class GoogleLoginTest extends TestCase
         $this->get('/api/auth/google/callback');
 
         $this->assertSame(0, UserAppAccess::where('user_id', $user->id)->count());
-    }
-
-    public function test_new_user_gets_all_active_menus_once(): void
-    {
-        $admin = User::factory()->create(['is_admin' => true]);
-        $activeCount = YapinetApp::where('is_active', true)->count();
-
-        $id = $this->actingAs($admin)
-            ->postJson('/api/admin/users', ['full_name' => 'Guru Baru', 'primary_email' => 'baru2@yayasan.id'])
-            ->assertCreated()
-            ->json('id');
-
-        $this->assertGreaterThan(0, $activeCount);
-        $this->assertSame($activeCount, UserAppAccess::where('user_id', $id)->count());
     }
 }

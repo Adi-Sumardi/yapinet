@@ -5,27 +5,27 @@ namespace App\Actions;
 use App\Models\User;
 use App\Models\UserAppAccess;
 use App\Models\YapinetApp;
+use App\Services\SettingsService;
 
 /**
- * Memberi user baru akses ke semua menu aktif — dijalankan SEKALI saat user
- * dibuat admin, bukan di setiap login. Dulu grant ini diulang tiap login
- * sehingga akses yang dicabut admin muncul lagi (lihat rules/overview.md).
+ * Memberi user baru akses ke menu aktif yang ditandai "berikan ke semua"
+ * (apps.grant_to_all) — SEKALI saat user dibuat admin, bukan di setiap
+ * login, supaya akses yang dicabut admin tetap tercabut.
  */
 class GrantDefaultAccess
 {
+    public function __construct(private SettingsService $settings) {}
+
     public function __invoke(User $user, ?User $grantedBy = null): void
     {
-        foreach (YapinetApp::where('is_active', true)->get() as $app) {
-            // yayasan_role/can_act masih wajib di skema lama; kolom ini
-            // dihapus di Fase 1 (role cuma Admin & User).
+        if (! $this->settings->get('access.auto_grant_new_users')) {
+            return;
+        }
+
+        foreach (YapinetApp::active()->where('grant_to_all', true)->get() as $app) {
             UserAppAccess::firstOrCreate(
-                ['user_id' => $user->id, 'app_id' => $app->id, 'unit_id' => null],
-                [
-                    'yayasan_role' => 'bph',
-                    'can_act' => true,
-                    'granted_by' => $grantedBy?->id,
-                    'granted_at' => now(),
-                ]
+                ['user_id' => $user->id, 'app_id' => $app->id, 'scope_key' => 'all'],
+                ['granted_by' => $grantedBy?->id, 'granted_at' => now()]
             );
         }
     }

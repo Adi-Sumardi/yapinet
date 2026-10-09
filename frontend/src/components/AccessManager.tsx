@@ -1,22 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, type AdminGrant, type AdminUser } from '../lib/api'
+import { api, type AdminUser } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
-
-const ROLE_LABEL: Record<AdminGrant['yayasan_role'], string> = {
-  bph: 'BPH',
-  pembina: 'Pembina',
-  pengawas: 'Pengawas',
-  app_admin: 'Admin Aplikasi',
-}
-
-type RowState = { role: AdminGrant['yayasan_role']; canAct: boolean }
 
 export default function AccessManager() {
   const queryClient = useQueryClient()
   const { me } = useAuth()
   const [selectedUserId, setSelectedUserId] = useState('')
-  const [rows, setRows] = useState<Record<string, RowState>>({})
   const [newUserName, setNewUserName] = useState('')
   const [newUserEmail, setNewUserEmail] = useState('')
   const [createError, setCreateError] = useState<string | null>(null)
@@ -56,27 +46,10 @@ export default function AccessManager() {
     enabled: !!selectedUserId,
   })
 
-  useEffect(() => {
-    if (!appsQuery.data) return
-
-    const next: Record<string, RowState> = {}
-    for (const app of appsQuery.data) {
-      const existing = grantsQuery.data?.find((g) => g.app_id === app.id)
-      next[app.id] = { role: existing?.yayasan_role ?? 'pembina', canAct: existing?.can_act ?? false }
-    }
-    setRows(next)
-  }, [appsQuery.data, grantsQuery.data])
-
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin-grants', selectedUserId] })
 
   const grantMutation = useMutation({
-    mutationFn: (appId: string) =>
-      api.adminGrant({
-        user_id: selectedUserId,
-        app_id: appId,
-        yayasan_role: rows[appId].role,
-        can_act: rows[appId].canAct,
-      }),
+    mutationFn: (appId: string) => api.adminGrant({ user_id: selectedUserId, app_id: appId }),
     onSuccess: invalidate,
   })
 
@@ -187,46 +160,21 @@ export default function AccessManager() {
         <div className="mt-5 flex flex-col divide-y divide-line-soft border-t border-line-soft">
           {appsQuery.data?.map((app) => {
             const grant = grantsQuery.data?.find((g) => g.app_id === app.id)
-            const row = rows[app.id] ?? { role: 'pembina', canAct: false }
 
             return (
               <div key={app.id} className="flex flex-wrap items-center gap-3 py-3.5">
                 <span className="w-28 shrink-0 text-sm font-semibold text-ink">{app.name}</span>
 
-                <select
-                  value={row.role}
-                  onChange={(e) =>
-                    setRows((prev) => ({
-                      ...prev,
-                      [app.id]: { ...row, role: e.target.value as AdminGrant['yayasan_role'] },
-                    }))
-                  }
-                  className="rounded-lg border border-line px-2.5 py-1.5 text-xs text-ink"
-                >
-                  {Object.entries(ROLE_LABEL).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-
-                <label className="flex items-center gap-1.5 text-xs text-ink-soft">
-                  <input
-                    type="checkbox"
-                    checked={row.canAct}
-                    onChange={(e) => setRows((prev) => ({ ...prev, [app.id]: { ...row, canAct: e.target.checked } }))}
-                  />
-                  Bisa bertindak
-                </label>
-
                 <div className="ml-auto flex gap-2">
-                  <button
-                    onClick={() => grantMutation.mutate(app.id)}
-                    disabled={grantMutation.isPending}
-                    className="tap-scale rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
-                  >
-                    {grant ? 'Simpan' : 'Beri Akses'}
-                  </button>
+                  {!grant && (
+                    <button
+                      onClick={() => grantMutation.mutate(app.id)}
+                      disabled={grantMutation.isPending}
+                      className="tap-scale rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                    >
+                      Beri Akses
+                    </button>
+                  )}
                   {grant && (
                     <button
                       onClick={() => revokeMutation.mutate(grant.id)}

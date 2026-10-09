@@ -24,11 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withSchedule(function (Schedule $schedule): void {
-        // Cron Job hPanel hanya perlu memanggil `php artisan schedule:run` tiap menit;
-        // interval sebenarnya (tiap aplikasi punya cache_ttl_seconds sendiri) ditentukan
-        // di sini, bukan di cron — lihat Bab 04/05 blueprint Yapinet.
+        // Cron Job hPanel memanggil `php artisan schedule:run` tiap menit; command
+        // sendiri yang memutuskan menu mana yang sudah jatuh tempo (refresh_minutes).
         $schedule->command(RefreshAppSummaries::class)
-            ->everyFiveMinutes()
+            ->everyMinute()
             ->withoutOverlapping()
             ->onOneServer();
     })
