@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/users', [AccessController::class, 'users']);
         Route::post('/users', [AccessController::class, 'storeUser']);
+        Route::delete('/users/{user}', [AccessController::class, 'destroyUser']);
         Route::get('/apps', [AccessController::class, 'apps']);
         Route::get('/access', [AccessController::class, 'grants']);
         Route::post('/access', [AccessController::class, 'grant']);

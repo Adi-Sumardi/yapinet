@@ -25,6 +25,7 @@ const CUSTOM_DETAIL: Record<string, (props: { cards: SummaryCard[] }) => React.J
   SMOY: ComingSoonDetail,
   SHRS: ComingSoonDetail,
   ESPP: ComingSoonDetail,
+  SIAK: ComingSoonDetail,
   PMB: ComingSoonDetail,
   ARSD: ComingSoonDetail,
   SKLH: ComingSoonDetail,

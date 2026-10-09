@@ -8,6 +8,7 @@ use App\Models\UserAppAccess;
 use App\Models\YapinetApp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 /**
@@ -38,6 +39,23 @@ class AccessController extends Controller
         ]);
 
         return response()->json($user->only(['id', 'full_name', 'primary_email', 'status', 'is_admin']), 201);
+    }
+
+    public function destroyUser(Request $request, User $user): JsonResponse
+    {
+        abort_if($user->is($request->user()), 422, 'Tidak bisa menghapus akun Anda sendiri.');
+
+        DB::transaction(function () use ($user) {
+            // Token Sanctum (morph) & token OAuth Passport tidak punya FK
+            // cascade ke users — hapus manual supaya sesi user ikut mati.
+            $user->tokens()->delete();
+            DB::table('oauth_access_tokens')->where('user_id', $user->id)->delete();
+            DB::table('oauth_auth_codes')->where('user_id', $user->id)->delete();
+
+            $user->delete();
+        });
+
+        return response()->json(['message' => 'Pengguna dihapus.']);
     }
 
     public function apps(): JsonResponse

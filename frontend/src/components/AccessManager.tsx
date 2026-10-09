@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, type AdminGrant } from '../lib/api'
+import { api, type AdminGrant, type AdminUser } from '../lib/api'
+import { useAuth } from '../context/AuthContext'
 
 const ROLE_LABEL: Record<AdminGrant['yayasan_role'], string> = {
   bph: 'BPH',
@@ -13,6 +14,7 @@ type RowState = { role: AdminGrant['yayasan_role']; canAct: boolean }
 
 export default function AccessManager() {
   const queryClient = useQueryClient()
+  const { me } = useAuth()
   const [selectedUserId, setSelectedUserId] = useState('')
   const [rows, setRows] = useState<Record<string, RowState>>({})
   const [newUserName, setNewUserName] = useState('')
@@ -31,6 +33,22 @@ export default function AccessManager() {
     },
     onError: () => setCreateError('Gagal menambah pengguna. Periksa email (mungkin sudah dipakai).'),
   })
+
+  const deleteUserMutation = useMutation({
+    mutationFn: (userId: string) => api.adminDeleteUser(userId),
+    onSuccess: (_, userId) => {
+      if (userId === selectedUserId) setSelectedUserId('')
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+    },
+    onError: () => window.alert('Gagal menghapus pengguna.'),
+  })
+
+  const confirmDelete = (user: AdminUser) => {
+    if (window.confirm(`Hapus ${user.full_name} (${user.primary_email})? Pengguna ini tidak akan bisa login lagi.`)) {
+      deleteUserMutation.mutate(user.id)
+    }
+  }
+
   const appsQuery = useQuery({ queryKey: ['admin-apps'], queryFn: api.adminApps })
   const grantsQuery = useQuery({
     queryKey: ['admin-grants', selectedUserId],
@@ -119,8 +137,38 @@ export default function AccessManager() {
         </p>
       </form>
 
-      <label className="mt-5 block text-xs font-semibold uppercase tracking-wide text-ink-faint">
-        Pilih pengguna
+      <h3 className="mt-6 text-xs font-semibold uppercase tracking-wide text-ink-faint">
+        Daftar Pengguna ({usersQuery.data?.length ?? 0})
+      </h3>
+      <div className="mt-1.5 flex flex-col divide-y divide-line-soft rounded-xl border border-line-soft">
+        {usersQuery.data?.map((u) => (
+          <div key={u.id} className="flex items-center gap-3 px-3.5 py-2.5">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-ink">
+                {u.full_name}
+                {u.is_admin && (
+                  <span className="ml-2 rounded-md bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-accent">
+                    Admin
+                  </span>
+                )}
+              </p>
+              <p className="truncate text-xs text-ink-soft">{u.primary_email}</p>
+            </div>
+            {u.id !== me?.user.id && (
+              <button
+                onClick={() => confirmDelete(u)}
+                disabled={deleteUserMutation.isPending}
+                className="tap-scale shrink-0 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
+              >
+                Hapus
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <label className="mt-6 block text-xs font-semibold uppercase tracking-wide text-ink-faint">
+        Atur akses aplikasi — pilih pengguna
       </label>
       <select
         value={selectedUserId}

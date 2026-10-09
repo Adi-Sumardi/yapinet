@@ -1,6 +1,6 @@
 
 # SPA client-side routing (React Router) — semua path yang bukan file/folder
-# fisik dilempar ke index.html supaya rute seperti /login atau /ganti-password
+# fisik dilempar ke index.html supaya rute seperti /login atau /auth/callback
 # tidak 404 waktu diakses langsung atau di-refresh.
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -8,4 +8,12 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . /index.html [L]
+</IfModule>
+
+# Jangan cache file entry point — kalau ter-cache (browser/CDN), user terus
+# dapat build lama. File di assets/ aman di-cache karena namanya ber-hash.
+<IfModule mod_headers.c>
+    <FilesMatch "^(index\.html|sw\.js|registerSW\.js|manifest\.webmanifest)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+    </FilesMatch>
 </IfModule>

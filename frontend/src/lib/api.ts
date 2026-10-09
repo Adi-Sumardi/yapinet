@@ -106,6 +106,7 @@ export const api = {
   adminUsers: () => request<AdminUser[]>('/api/admin/users'),
   adminCreateUser: (payload: { full_name: string; primary_email: string }) =>
     request<AdminUser>('/api/admin/users', { method: 'POST', body: JSON.stringify(payload) }),
+  adminDeleteUser: (userId: string) => request(`/api/admin/users/${userId}`, { method: 'DELETE' }),
   adminApps: () => request<AdminApp[]>('/api/admin/apps'),
   adminGrants: (userId: string) => request<AdminGrant[]>(`/api/admin/access?user_id=${userId}`),
   adminGrant: (payload: { user_id: string; app_id: string; yayasan_role: AdminGrant['yayasan_role']; can_act: boolean }) =>

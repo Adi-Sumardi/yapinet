@@ -20,6 +20,7 @@ const THEME: Record<string, AppTheme> = {
   SHRS: { initials: 'HR', category: 'Aplikasi Sistem Manajemen Kepegawaian YAPI', color: '#1c1c1e', shadow: 'rgba(28,28,30,0.3)', soft: '#f1f1f2' }, // SiHaris
   SMNS: { initials: 'SN', category: 'Aplikasi Sistem Monitoring Warga Asrama', color: '#9C5FC0', shadow: 'rgba(156,95,192,0.35)', soft: '#f8f0fb' }, // Simonas
   ESPP: { initials: 'SP', category: 'Aplikasi Sistem Manajemen Pembayaran SPP Murid', color: '#E0A527', shadow: 'rgba(224,165,39,0.35)', soft: '#fdf6e8' }, // e-SPP
+  SIAK: { initials: 'SA', category: 'Aplikasi Sistem Informasi Akademik', color: '#E0A527', shadow: 'rgba(224,165,39,0.35)', soft: '#fdf6e8' }, // SIAKAD
   PMB: { initials: 'PM', category: 'Aplikasi Sistem Manajemen Penerimaan Murid Baru', color: '#1F6FA6', shadow: 'rgba(31,111,166,0.35)', soft: '#eaf3fa' }, // PMB
   ARSD: { initials: 'AD', category: 'Aplikasi Sistem Manajemen Arsip Digital', color: '#6D4E9C', shadow: 'rgba(109,78,156,0.3)', soft: '#f2eefa' }, // Arsip Digital
   SKLH: { initials: 'SK', category: 'Aplikasi Sistem Manajemen Sekolah', color: '#D9534F', shadow: 'rgba(217,83,79,0.35)', soft: '#fbeeed' }, // Sekolah

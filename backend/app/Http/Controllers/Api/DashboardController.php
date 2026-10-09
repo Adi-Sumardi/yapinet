@@ -21,6 +21,7 @@ class DashboardController extends Controller
     {
         $access = UserAppAccess::with('app', 'unit')
             ->where('user_id', $request->user()->id)
+            ->whereHas('app', fn ($query) => $query->where('is_active', true))
             ->get();
 
         $cards = $access->flatMap(function (UserAppAccess $grant) {
@@ -49,12 +50,12 @@ class DashboardController extends Controller
     }
 
     /**
-     * Urutan menu tetap: Sianggar, Simaya, Simonik, Simonas, SiHaris, Simoy,
+     * Urutan menu tetap: Sianggar, Simaya, Simonas, SiHaris, SIAKAD, PMB,
      * lalu sisanya — tidak mengandalkan urutan pembuatan UserAppAccess.
      */
     private static function sortByMenuOrder($cards)
     {
-        $order = ['SNGR', 'SMYA', 'SMNK', 'SMNS', 'SHRS', 'SMOY', 'ESPP', 'PMB', 'ARSD', 'SKLH', 'FRNT'];
+        $order = ['SNGR', 'SMYA', 'SMNS', 'SHRS', 'SIAK', 'PMB'];
 
         return $cards->sortBy(function (array $card) use ($order) {
             $index = array_search($card['app_code'], $order, true);

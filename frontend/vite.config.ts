@@ -9,6 +9,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      // Service worker dimatikan: sw.js lama sempat ter-cache CDN Hostinger
+      // seminggu sehingga browser terus menyajikan build lama. selfDestroying
+      // menerbitkan sw.js yang menghapus cache & unregister dirinya sendiri.
+      selfDestroying: true,
       registerType: 'autoUpdate',
       includeAssets: ['favicon-32.png', 'favicon-16.png', 'apple-touch-icon.png', 'logo.png'],
       manifest: {

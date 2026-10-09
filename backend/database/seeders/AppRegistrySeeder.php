@@ -28,16 +28,18 @@ class AppRegistrySeeder extends Seeder
         $apps = [
             ['code' => 'SNGR', 'name' => 'Sianggar', 'desc' => 'Manajemen anggaran unit: pengajuan, LPJ, geser anggaran, surat internal', 'public_url' => 'https://sianggar.yapinet.id', 'base_url' => env('SNGR_BASE_URL', 'https://sianggar.yapinet.id')],
             ['code' => 'SMYA', 'name' => 'Simaya', 'desc' => 'Manajemen aset Yayasan', 'public_url' => 'https://simaya.yapi.web.id', 'base_url' => env('SMYA_BASE_URL', 'https://simaya.yapi.web.id')],
-            ['code' => 'SMNK', 'name' => 'Simonik', 'desc' => 'Pencatatan meeting & follow up meeting', 'public_url' => 'https://simonik.yapinet.id', 'base_url' => env('SMNK_BASE_URL', 'https://simonik.yapinet.id')],
-            ['code' => 'SMOY', 'name' => 'Simoy', 'desc' => 'Peminjaman/pemakaian mobil Yayasan oleh unit'],
+            ['code' => 'SMNK', 'name' => 'Simonik', 'desc' => 'Pencatatan meeting & follow up meeting', 'public_url' => 'https://simonik.yapinet.id', 'base_url' => env('SMNK_BASE_URL', 'https://simonik.yapinet.id'), 'active' => false],
+            ['code' => 'SMOY', 'name' => 'Simoy', 'desc' => 'Peminjaman/pemakaian mobil Yayasan oleh unit', 'active' => false],
             ['code' => 'SHRS', 'name' => 'SiHaris', 'desc' => 'HR: absensi, penggajian, cuti, dan lainnya'],
             ['code' => 'SMNS', 'name' => 'Simonas', 'desc' => 'Monitoring kegiatan mahasiswa yang tinggal di asrama', 'public_url' => 'https://simonas.id', 'base_url' => env('SMNS_BASE_URL', 'https://simonas.id')],
-            ['code' => 'ESPP', 'name' => 'e-SPP', 'desc' => 'Sistem pembayaran SPP digital'],
+            ['code' => 'ESPP', 'name' => 'e-SPP', 'desc' => 'Sistem pembayaran SPP digital', 'active' => false],
+            ['code' => 'SIAK', 'name' => 'SIAKAD', 'desc' => 'Sistem informasi akademik', 'public_url' => 'https://siakad.yapinet.id'],
             ['code' => 'PMB', 'name' => 'PMB', 'desc' => 'Penerimaan murid/mahasiswa baru'],
-            ['code' => 'ARSD', 'name' => 'Arsip Digital', 'desc' => 'Manajemen dokumen dan arsip Yayasan'],
-            ['code' => 'SKLH', 'name' => 'Sekolah', 'desc' => 'Data dan profil sekolah'],
-            ['code' => 'FRNT', 'name' => 'Front Office', 'desc' => 'Layanan front office / resepsionis unit'],
+            ['code' => 'ARSD', 'name' => 'Arsip Digital', 'desc' => 'Manajemen dokumen dan arsip Yayasan', 'active' => false],
+            ['code' => 'SKLH', 'name' => 'Sekolah', 'desc' => 'Data dan profil sekolah', 'active' => false],
+            ['code' => 'FRNT', 'name' => 'Front Office', 'desc' => 'Layanan front office / resepsionis unit', 'active' => false],
         ];
+        // 'active' => false = disembunyikan dari menu (2026-10-09), data tetap ada.
 
         foreach ($apps as $definition) {
             $slug = Str::lower($definition['code']);
@@ -60,7 +62,7 @@ class AppRegistrySeeder extends Seeder
                     // /integrations/yapinet/sso/consume miliknya sendiri.
                     'sso_endpoint' => null,
                     'cache_ttl_seconds' => 600,
-                    'is_active' => true,
+                    'is_active' => $definition['active'] ?? true,
                 ]
             );
 
