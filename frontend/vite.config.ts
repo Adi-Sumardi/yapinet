@@ -13,6 +13,10 @@ export default defineConfig({
       // seminggu sehingga browser terus menyajikan build lama. selfDestroying
       // menerbitkan sw.js yang menghapus cache & unregister dirinya sendiri.
       selfDestroying: true,
+      // Jangan daftarkan /sw.js lagi: CDN Hostinger sempat menyajikan sw.js
+      // lama dari cache sehingga service worker lama terus terpasang ulang.
+      // Pembersihan dilakukan skrip inline di index.html.
+      injectRegister: false,
       registerType: 'autoUpdate',
       includeAssets: ['favicon-32.png', 'favicon-16.png', 'apple-touch-icon.png', 'logo.png'],
       manifest: {

@@ -15,6 +15,19 @@
       rel="stylesheet"
     />
     <title>Yapinet</title>
+    <script>
+      // Bersihkan service worker & cache PWA lama (sebelum 2026-10). Service
+      // worker lama menyajikan build usang dan membuat /auth/callback macet.
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          if (!regs.length) return
+          Promise.all(regs.map(function (r) { return r.unregister() }))
+            .then(function () { return window.caches ? caches.keys() : [] })
+            .then(function (keys) { return Promise.all(keys.map(function (k) { return caches.delete(k) })) })
+            .then(function () { if (navigator.serviceWorker.controller) location.reload() })
+        })
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
