@@ -100,4 +100,28 @@ class GoogleLoginTest extends TestCase
 
         $this->assertSame(['SIAK'], $codes->all());
     }
+
+    public function test_login_does_not_regrant_revoked_access(): void
+    {
+        $user = User::factory()->create(['primary_email' => 'guru@yayasan.id']);
+        $this->fakeGoogle('guru@yayasan.id');
+
+        $this->get('/api/auth/google/callback');
+
+        $this->assertSame(0, UserAppAccess::where('user_id', $user->id)->count());
+    }
+
+    public function test_new_user_gets_all_active_menus_once(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $activeCount = YapinetApp::where('is_active', true)->count();
+
+        $id = $this->actingAs($admin)
+            ->postJson('/api/admin/users', ['full_name' => 'Guru Baru', 'primary_email' => 'baru2@yayasan.id'])
+            ->assertCreated()
+            ->json('id');
+
+        $this->assertGreaterThan(0, $activeCount);
+        $this->assertSame($activeCount, UserAppAccess::where('user_id', $id)->count());
+    }
 }

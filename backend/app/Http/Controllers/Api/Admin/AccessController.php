@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Actions\GrantDefaultAccess;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserAppAccess;
@@ -25,7 +26,7 @@ class AccessController extends Controller
         );
     }
 
-    public function storeUser(Request $request): JsonResponse
+    public function storeUser(Request $request, GrantDefaultAccess $grantDefaultAccess): JsonResponse
     {
         $data = $request->validate([
             'full_name' => 'required|string|max:255',
@@ -37,6 +38,8 @@ class AccessController extends Controller
             'primary_email' => $data['primary_email'],
             'status' => 'active',
         ]);
+
+        $grantDefaultAccess($user, $request->user());
 
         return response()->json($user->only(['id', 'full_name', 'primary_email', 'status', 'is_admin']), 201);
     }

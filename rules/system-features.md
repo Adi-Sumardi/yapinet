@@ -264,10 +264,10 @@ pengguna, rentang tanggal.
 Kerjakan **berurutan**. Tiap fase harus bisa di-deploy sendiri tanpa
 merusak fase sebelumnya.
 
-### Fase 0 — Bersih-bersih (kecil, cepat)
-- Perbaiki `deploy.sh` (path `composer.lock`), `LOG_CHANNEL=daily`.
-- Pasang ESLint v9 config, Prettier, Laravel Pint.
-- Hentikan auto-grant di setiap login (pindah ke "sekali saat dibuat").
+### Fase 0 — Bersih-bersih (kecil, cepat) ✅ selesai 2026-10-09
+- Perbaiki `deploy.sh` (path `composer.lock`), log harian.
+- Prettier + Laravel Pint + `.editorconfig` (lint frontend: oxlint yang sudah ada).
+- Hentikan auto-grant di setiap login (pindah ke "sekali saat dibuat" — `Actions/GrantDefaultAccess`).
 
 ### Fase 1 — Fondasi backend
 - Migrasi skema `apps` baru + `settings` (lihat `database.md`), migrasi data

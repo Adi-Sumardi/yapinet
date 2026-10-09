@@ -96,14 +96,13 @@ Ini daftar masalah nyata di kode sekarang. Penataan ulang harus menutupnya.
    `DashboardController`, `AppAdapterResolver::$map`, `AppRegistrySeeder`.
 2. **Tile dashboard bergantung cache** — aplikasi baru tidak muncul sampai
    scheduler membuat baris `app_summary_cache`.
-3. **Auto-grant terlalu lebar** — `AuthController::callback` memberi semua
+3. ~~**Auto-grant terlalu lebar**~~ (**diperbaiki di Fase 0**: grant sekali saat user dibuat) — `AuthController::callback` memberi semua
    aplikasi aktif ke semua user sebagai `bph` + `can_act=true` di setiap login,
    sehingga pencabutan akses di panel admin akan dibatalkan di login berikutnya.
 4. **Unique index dengan NULL** — `unique(app_id, unit_id)` di
    `app_summary_cache` & `user_app_access`: di MySQL, `NULL` dianggap berbeda
    sehingga duplikat baris "semua unit" tetap bisa terjadi.
-5. **`deploy.sh` tidak pernah `composer install`** — mengecek
-   `^composer.lock$` padahal path diff-nya `backend/composer.lock`.
+5. ~~`deploy.sh` tidak pernah `composer install`~~ — **diperbaiki di Fase 0**.
 6. **Repo ter-clone di dalam `public_html`** — sekarang aman (403), tapi
    rapuh; target: pindah ke luar `public_html`.
 7. **CDN Hostinger meng-cache file entry** (`sw.js`, `index.html`) 7 hari dan
@@ -114,6 +113,6 @@ Ini daftar masalah nyata di kode sekarang. Penataan ulang harus menutupnya.
 10. **Kolom/tabel legacy**: `users.password`, `users.must_change_password`,
     `notifications` (tidak dipakai), `app_credentials.*_encrypted` (nama
     menyesatkan — nilai sudah dienkripsi oleh cast, bukan oleh nama kolom).
-11. **ESLint tidak jalan** (belum ada `eslint.config.js` untuk ESLint v9),
-    tidak ada Prettier/Pint di workflow.
+11. ~~Tidak ada Prettier/Pint di workflow~~ — **selesai di Fase 0**
+    (lint frontend memakai oxlint: `npm run lint`).
 12. **Unit hanya "Kantor Yayasan"** — fitur per-unit belum benar-benar dipakai.

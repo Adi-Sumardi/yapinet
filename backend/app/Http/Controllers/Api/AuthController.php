@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\UserAppAccess;
-use App\Models\YapinetApp;
 use App\Services\GoogleAccountResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -39,16 +38,6 @@ class AuthController extends Controller
 
         if (is_string($user)) {
             return redirect()->away("{$frontendUrl}/login?error={$user}");
-        }
-
-        // Pastikan user punya akses ke setiap aplikasi aktif — dijalankan
-        // tiap login supaya aplikasi baru yang ditambahkan ke App Registry
-        // otomatis ikut muncul buat user lama juga di login berikutnya.
-        foreach (YapinetApp::where('is_active', true)->get() as $app) {
-            UserAppAccess::firstOrCreate(
-                ['user_id' => $user->id, 'app_id' => $app->id, 'unit_id' => null],
-                ['yayasan_role' => 'bph', 'can_act' => true]
-            );
         }
 
         AuditLog::create([

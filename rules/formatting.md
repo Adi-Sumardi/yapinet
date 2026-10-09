@@ -52,8 +52,8 @@ Aturan:
 | Bahasa | Alat | Perintah | Konfigurasi |
 |---|---|---|---|
 | PHP | **Laravel Pint** (preset `laravel`) | `cd backend && ./vendor/bin/pint` | `backend/pint.json` |
-| TS/TSX/CSS | **Prettier** | `cd frontend && npx prettier --write src` | `frontend/.prettierrc` |
-| TS/TSX lint | **ESLint v9** (flat config) | `cd frontend && npx eslint src` | `frontend/eslint.config.js` |
+| TS/TSX/CSS | **Prettier** | `cd frontend && npm run format` | `frontend/.prettierrc` |
+| TS/TSX lint | **oxlint** (sudah terpasang) | `cd frontend && npm run lint` | default oxlint |
 
 Prettier (`.prettierrc`), sesuai gaya kode yang sudah ada:
 
