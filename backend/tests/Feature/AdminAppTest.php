@@ -152,4 +152,22 @@ class AdminAppTest extends TestCase
         $this->assertSame('Halo', $app->summaries()->first()->sections[0]['text']);
         $this->assertTrue($app->fresh()->last_check_ok);
     }
+
+    public function test_dns_failures_are_cached(): void
+    {
+        $lookups = 0;
+        $this->app->instance(SafeUrlValidator::class, new SafeUrlValidator(function () use (&$lookups) {
+            $lookups++;
+
+            return [];
+        }));
+
+        foreach ([1, 2] as $_) {
+            $this->actingAs($this->admin)->postJson('/api/admin/apps/test-connection', [
+                'summary_url' => 'https://dns-rusak.example/api', 'auth_type' => 'none',
+            ])->assertJsonPath('data.ok', false);
+        }
+
+        $this->assertSame(1, $lookups);
+    }
 }

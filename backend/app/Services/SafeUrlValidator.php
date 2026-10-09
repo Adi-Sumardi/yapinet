@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Closure;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Mencegah SSRF: URL API ringkasan diisi admin lalu dipanggil dari server,
@@ -44,9 +45,21 @@ class SafeUrlValidator
             return $this->fail('URL harus diawali https://.');
         }
 
+        // Resolver sistem tidak punya batas waktu: host dengan DNS rusak
+        // (mis. simaya.yapi.web.id, 2026-10) bisa menahan request ~45 dtk.
+        // Kegagalan di-cache 10 menit supaya Segarkan/Tes Koneksi tidak
+        // menggantung berulang kali.
+        $failKey = "dns-fail:{$host}";
+
+        if (Cache::has($failKey)) {
+            return $this->fail("Host {$host} tidak ditemukan (DNS gagal, dicoba lagi dalam beberapa menit).");
+        }
+
         $ips = ($this->resolver)($host);
 
         if ($ips === []) {
+            Cache::put($failKey, true, now()->addMinutes(10));
+
             return $this->fail("Host {$host} tidak ditemukan.");
         }
 
