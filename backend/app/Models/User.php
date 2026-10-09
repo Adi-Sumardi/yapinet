@@ -13,15 +13,11 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, HasUuids, Notifiable;
 
-    protected $fillable = ['full_name', 'primary_email', 'password', 'must_change_password', 'status', 'is_admin'];
-
-    protected $hidden = ['password'];
+    protected $fillable = ['full_name', 'primary_email', 'status', 'is_admin'];
 
     protected function casts(): array
     {
         return [
-            'password' => 'hashed',
-            'must_change_password' => 'boolean',
             'is_admin' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

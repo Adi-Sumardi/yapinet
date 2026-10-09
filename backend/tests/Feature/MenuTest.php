@@ -99,17 +99,4 @@ class MenuTest extends TestCase
         $this->assertStringContainsString('/sso/consume?ticket=', $url);
         $this->assertDatabaseCount('handoff_tickets', 1);
     }
-
-    public function test_legacy_dashboard_summary_still_works(): void
-    {
-        $user = User::factory()->create();
-        $app = YapinetApp::factory()->create(['code' => 'SNGR']);
-        $this->grant($user, $app);
-        AppSummaryCache::create(['app_id' => $app->id, 'status' => 'ok', 'headline' => 'x', 'metrics' => [], 'fetched_at' => now()]);
-
-        $this->actingAs($user)->getJson('/api/dashboard/summary')
-            ->assertOk()
-            ->assertJsonPath('cards.0.app_code', 'SNGR')
-            ->assertJsonPath('cards.0.can_act', false);
-    }
 }

@@ -30,5 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ->everyMinute()
             ->withoutOverlapping()
             ->onOneServer();
+
+        $schedule->command('sanctum:prune-expired --hours=24')->daily();
     })
     ->create();

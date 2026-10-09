@@ -50,7 +50,9 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Token login PWA berlaku 30 hari (rules/security.md §1); dibersihkan
+    // harian oleh scheduler (sanctum:prune-expired).
+    'expiration' => (int) env('SANCTUM_EXPIRATION_MINUTES', 60 * 24 * 30),
 
     /*
     |--------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 #
 # Jalankan DI SERVER (lewat SSH/Termius), dari dalam folder backend:
 #     cd ~/domains/yapinet.id/public_html/yapinet/backend && bash deploy.sh
+#   (otomatis backup database ke ~/backups bila ada migrasi baru)
 #
 # Prasyarat satu kali (lewat hPanel, bukan lewat script ini):
 #   1. Subdomain api.yapinet.id dibuat, document root diarahkan ke
@@ -72,7 +73,27 @@ else
 fi
 echo ""
 
-# ── 3. Migrate ────────────────────────────────────────────────────────────────
+# ── 3. Backup DB (hanya bila ada migrasi tertunda) lalu migrate ────────────
+#    Backup disimpan di ~/backups (di luar web root), 14 file terakhir disimpan.
+if $PHP artisan migrate:status --pending 2>/dev/null | grep -q "Pending"; then
+    echo "💾  [3/6] Ada migrasi tertunda — backup database dulu..."
+    mkdir -p "$HOME/backups" && chmod 700 "$HOME/backups"
+    CNF="$(mktemp)"
+    if DB_NAME="$($PHP artisan app:write-db-client-config "$CNF" | tail -1)"; then
+        BACKUP="$HOME/backups/yapinet-$(date +%Y%m%d-%H%M%S).sql.gz"
+        if mysqldump --defaults-extra-file="$CNF" --single-transaction --no-tablespaces "$DB_NAME" </dev/null | gzip > "$BACKUP" \
+            && zcat "$BACKUP" </dev/null | tail -1 | grep -q "Dump completed"; then
+            chmod 600 "$BACKUP"
+            echo "    ✅ Backup: $BACKUP"
+            ls -1t "$HOME"/backups/yapinet-*.sql.gz | tail -n +15 | xargs -r rm -f
+        else
+            rm -f "$CNF" "$BACKUP"
+            echo "❌  Backup gagal — migrasi DIBATALKAN supaya data aman."
+            exit 1
+        fi
+    fi
+    rm -f "$CNF"
+fi
 echo "🗄️   [3/6] php artisan migrate --force..."
 $PHP artisan migrate --force
 echo ""

@@ -5,6 +5,12 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
+
+    # Clone repo backend ada di public_html/yapinet (document root api.yapinet.id
+    # = public_html/yapinet/backend/public). Jangan pernah sajikan isinya (log,
+    # composer.lock, file PHP, dll.) lewat yapinet.id — rules/security.md §7.
+    RewriteCond %{HTTP_HOST} ^(www\.)?yapinet\.id$ [NC]
+    RewriteRule ^yapinet(/|$) - [F,L]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . /index.html [L]

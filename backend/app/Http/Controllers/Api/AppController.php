@@ -11,8 +11,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Halaman detail menu untuk user. {app} boleh slug atau kode — kode dipakai
- * frontend lama (/apps/SNGR/...) sampai frontend Fase 2 live.
+ * Halaman detail menu untuk user. {app} = slug (kode juga diterima supaya
+ * tautan lama seperti /apps/SNGR tetap jalan).
  */
 class AppController extends Controller
 {
@@ -34,12 +34,6 @@ class AppController extends Controller
     public function open(Request $request, string $app, OpenApp $openApp): JsonResponse
     {
         return response()->json(['data' => $openApp($this->resolve($request, $app), $request->user(), $request->query('path'))]);
-    }
-
-    /** @deprecated frontend lama membaca redirect_url di level atas. */
-    public function legacyHandoff(Request $request, string $app, OpenApp $openApp): JsonResponse
-    {
-        return response()->json($openApp($this->resolve($request, $app), $request->user(), $request->query('path')));
     }
 
     private function resolve(Request $request, string $slugOrCode): YapinetApp

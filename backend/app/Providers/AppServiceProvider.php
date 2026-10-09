@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         Passport::authorizationView('oauth.authorize');
 
         // Batas sesuai rules/security.md §6.
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by($request->user()?->id ?: $request->ip()));
         RateLimiter::for('google-auth', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
         RateLimiter::for('app-refresh', fn (Request $request) => Limit::perMinute(2)
             ->by($request->user()?->id.'|'.$request->route('app')));

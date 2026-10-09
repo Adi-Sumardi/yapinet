@@ -14,7 +14,7 @@ use Illuminate\Validation\Rule;
 class SaveAppRequest extends FormRequest
 {
     /** Bentrok dengan path tetap di frontend (rules/views.md). */
-    public const RESERVED_SLUGS = ['login', 'auth', 'akun', 'admin', 'settings', 'assets', 'icons', 'api', 'storage'];
+    public const RESERVED_SLUGS = ['login', 'auth', 'akun', 'admin', 'settings', 'assets', 'icons', 'api', 'storage', 'yapinet'];
 
     public function rules(): array
     {

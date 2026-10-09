@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\Admin\AccessController;
 use App\Http\Controllers\Api\Admin\AppConnectionTestController;
 use App\Http\Controllers\Api\Admin\AppController as AdminAppController;
 use App\Http\Controllers\Api\Admin\AuditLogController;
@@ -10,7 +9,6 @@ use App\Http\Controllers\Api\Admin\UserAccessController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\AppController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\HandoffController;
 use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\OAuthUserController;
@@ -33,7 +31,7 @@ Route::get('/oauth/user', [OAuthUserController::class, 'show']);
 Route::post('/integrations/handoff/verify', [HandoffController::class, 'verify']);
 
 // ── User login ───────────────────────────────────────────────────────────────
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
@@ -41,10 +39,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/apps/{app}', [AppController::class, 'show']);
     Route::post('/apps/{app}/refresh', [AppController::class, 'refresh'])->middleware('throttle:app-refresh');
     Route::get('/apps/{app}/open', [AppController::class, 'open']);
-
-    // Kompatibilitas frontend lama — hapus setelah frontend Fase 2 live.
-    Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
-    Route::get('/apps/{app}/handoff', [AppController::class, 'legacyHandoff']);
 
     // ── Admin ────────────────────────────────────────────────────────────────
     Route::middleware('admin')->prefix('admin')->group(function () {
@@ -63,10 +57,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/audit-logs', [AuditLogController::class, 'index']);
         Route::post('/uploads/image', [UploadController::class, 'image']);
-
-        // Kompatibilitas AccessManager lama.
-        Route::get('/access', [AccessController::class, 'grants']);
-        Route::post('/access', [AccessController::class, 'grant']);
-        Route::delete('/access/{userAppAccess}', [AccessController::class, 'revoke']);
     });
 });
