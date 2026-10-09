@@ -188,7 +188,7 @@ export default function AppForm({
               <ImageInput
                 value={form.icon_url}
                 onChange={(url) => set('icon_url', url)}
-                hint="PNG/JPG/WEBP persegi, maks. 512 KB."
+                hint="PNG/JPG/WEBP, sebaiknya persegi. Gambar besar otomatis diperkecil."
                 error={fieldError('icon_url')}
               />
             )}

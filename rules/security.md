@@ -59,7 +59,7 @@ pembatasan, URL itu bisa diarahkan ke layanan internal hosting. Aturan
   oleh React (jangan `dangerouslySetInnerHTML`); `link`/`row_link`/`detail_path`
   hanya boleh path relatif atau URL dengan host yang sama dengan `open_url`.
 - Upload ikon: hanya `png`/`jpg`/`webp` — **SVG ditolak** (bisa berisi skrip),
-  maks 512 KB, disimpan dengan nama acak di `storage/app/public/app-icons`.
+  maks 2 MB (frontend memperkecil ke sisi 512 px sebelum upload), disimpan dengan nama acak di `storage/app/public/uploads`.
 - Blade: selalu `{{ }}`.
 
 ## 6. Rate limiting

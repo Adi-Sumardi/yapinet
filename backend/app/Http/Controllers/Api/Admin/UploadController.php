@@ -13,8 +13,8 @@ class UploadController extends Controller
     public function image(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => ['required', 'file', 'mimes:png,jpg,jpeg,webp', 'max:512'],
-        ], ['file.mimes' => 'Gunakan gambar PNG, JPG, atau WEBP.', 'file.max' => 'Ukuran gambar maksimal 512 KB.']);
+            'file' => ['required', 'file', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+        ], ['file.mimes' => 'Gunakan gambar PNG, JPG, atau WEBP.', 'file.max' => 'Ukuran gambar maksimal 2 MB.']);
 
         $path = $request->file('file')->store('uploads', 'public');
 

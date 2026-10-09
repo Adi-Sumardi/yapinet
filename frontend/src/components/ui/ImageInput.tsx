@@ -1,10 +1,11 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { api } from '../../lib/api'
+import { shrinkImage } from '../../lib/image'
 import { UploadIcon, XIcon } from '../icons'
 import Button from './Button'
 import { useToast } from './Toast'
 
-/** Upload gambar (PNG/JPG/WEBP ≤ 512 KB) ke /api/admin/uploads/image. */
+/** Upload gambar ke /api/admin/uploads/image — diperkecil dulu di browser (lib/image.ts). */
 export default function ImageInput({
   label,
   value,
@@ -25,7 +26,7 @@ export default function ImageInput({
   const upload = async (file: File) => {
     setUploading(true)
     try {
-      onChange(await api.admin.uploadImage(file))
+      onChange(await api.admin.uploadImage(await shrinkImage(file)))
       toast.success('Gambar diunggah')
     } catch (e) {
       toast.error('Gagal mengunggah gambar', { description: e instanceof Error ? e.message : undefined })

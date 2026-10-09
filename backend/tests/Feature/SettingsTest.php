@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SettingsTest extends TestCase
@@ -47,5 +49,19 @@ class SettingsTest extends TestCase
     public function test_non_admin_cannot_read_admin_settings(): void
     {
         $this->actingAs(User::factory()->create())->getJson('/api/admin/settings')->assertForbidden();
+    }
+
+    public function test_admin_can_upload_logo_up_to_2mb_but_not_svg(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)->post('/api/admin/uploads/image', [
+            'file' => UploadedFile::fake()->image('logo.png', 1200, 1200)->size(1500),
+        ], ['Accept' => 'application/json'])->assertCreated()->assertJsonStructure(['data' => ['url']]);
+
+        $this->actingAs($admin)->post('/api/admin/uploads/image', [
+            'file' => UploadedFile::fake()->create('logo.svg', 10, 'image/svg+xml'),
+        ], ['Accept' => 'application/json'])->assertUnprocessable();
     }
 }
