@@ -11,9 +11,10 @@
 #   2. File .env sudah ada di ~/yapinet/backend (isi dari .env.example,
 #      APP_URL=https://api.yapinet.id, FRONTEND_URL=https://yapinet.id,
 #      SANCTUM_STATEFUL_DOMAINS=yapinet.id, DB_* sesuai database MySQL
-#      yang dibuat di hPanel. Opsional: YAPINET_DEFAULT_PASSWORD (default
-#      "Yapinet@2026") — password awal semua user sebelum ganti password
-#      sendiri, lihat migration add_password_to_users_table.
+#      yang dibuat di hPanel, GOOGLE_CLIENT_ID/SECRET, dan
+#      GOOGLE_REDIRECT_URI=https://api.yapinet.id/api/auth/google/callback.
+#      Di Google Cloud Console daftarkan sebagai Authorized redirect URI:
+#      URI itu DAN https://api.yapinet.id/login/google/callback (SSO).
 #   3. Cron Job hPanel terpasang (sekali saja, bukan tiap deploy):
 #        * * * * * php /home/USERNAME/yapinet/backend/artisan schedule:run >> /dev/null 2>&1
 #

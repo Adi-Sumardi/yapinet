@@ -1,34 +1,18 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { api, setToken } from '../lib/api'
-import { useAuth } from '../context/AuthContext'
+import { useSearchParams } from 'react-router-dom'
+import { googleLoginUrl } from '../lib/api'
 import LogoMark from '../components/LogoMark'
 import HeroPattern from '../components/HeroPattern'
 
+const LOGIN_ERRORS: Record<string, string> = {
+  not_registered: 'Email Google Anda belum terdaftar di Yapinet. Minta Admin Yayasan menambahkan email Anda.',
+  suspended: 'Akun Anda dinonaktifkan. Hubungi Admin Yayasan.',
+  google_failed: 'Gagal masuk dengan Google. Silakan coba lagi.',
+}
+
 export default function Login() {
-  const navigate = useNavigate()
-  const { refresh } = useAuth()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setError(null)
-    setSubmitting(true)
-
-    try {
-      const { token, must_change_password } = await api.login(email, password)
-      setToken(token)
-      await refresh()
-      navigate(must_change_password ? '/ganti-password' : '/', { replace: true })
-    } catch {
-      setError('Email atau password salah.')
-    } finally {
-      setSubmitting(false)
-    }
-  }
+  const [params] = useSearchParams()
+  const errorCode = params.get('error')
+  const error = errorCode ? (LOGIN_ERRORS[errorCode] ?? LOGIN_ERRORS.google_failed) : null
 
   return (
     <div className="flex min-h-svh flex-col bg-surface md:flex-row">
@@ -49,53 +33,43 @@ export default function Login() {
       <div className="flex flex-1 flex-col justify-center px-6 py-10 md:px-16">
         <div className="mx-auto w-full max-w-sm">
           <h2 className="font-display text-xl font-bold text-ink">Masuk ke Yapinet</h2>
-          <p className="mt-1 text-sm text-ink-soft">Gunakan email dan password akun Yapinet Anda.</p>
+          <p className="mt-1 text-sm text-ink-soft">
+            Masuk dengan akun Google yang sudah didaftarkan oleh Admin Yayasan.
+          </p>
 
-          <form onSubmit={handleSubmit} className="mt-7 flex flex-col gap-3.5">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-faint">
-                Email
-              </label>
-              <input
-                type="email"
-                required
-                autoComplete="username"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink"
-                placeholder="nama@yayasan.id"
-              />
-            </div>
+          {error && <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
 
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-faint">
-                Password
-              </label>
-              <input
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink"
-                placeholder="••••••••"
-              />
-            </div>
-
-            {error && <p className="text-sm text-red-600">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="tap-scale mt-1.5 rounded-xl bg-accent px-5 py-3.5 text-sm font-semibold text-white disabled:opacity-60"
-            >
-              {submitting ? 'Memeriksa…' : 'Masuk'}
-            </button>
-          </form>
+          <a
+            href={googleLoginUrl()}
+            className="tap-scale mt-7 flex items-center justify-center gap-3 rounded-xl border border-line bg-surface px-5 py-4 shadow-sm"
+          >
+            <GoogleIcon />
+            <span className="text-sm font-semibold text-ink">Masuk dengan Google</span>
+          </a>
 
           <p className="mt-7 text-center text-xs text-ink-faint">Butuh bantuan akses? Hubungi Admin Yayasan.</p>
         </div>
       </div>
     </div>
+  )
+}
+
+function GoogleIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 18 18" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.56 2.7-3.86 2.7-6.62z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.95v2.33A9 9 0 0 0 9 18z"
+      />
+      <path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.17.29-1.7V4.97H.95A9 9 0 0 0 0 9c0 1.45.35 2.83.95 4.03z" />
+      <path
+        fill="#EA4335"
+        d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .95 4.97L3.95 7.3C4.66 5.17 6.65 3.58 9 3.58z"
+      />
+    </svg>
   )
 }

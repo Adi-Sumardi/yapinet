@@ -34,8 +34,6 @@ class AccessController extends Controller
         $user = User::create([
             'full_name' => $data['full_name'],
             'primary_email' => $data['primary_email'],
-            'password' => config('yapinet.default_password'),
-            'must_change_password' => true,
             'status' => 'active',
         ]);
 

@@ -10,5 +10,6 @@ Route::get('/', function () {
 // Login sesi (guard "web") — dipakai Passport saat browser di-redirect ke
 // /oauth/authorize untuk SSO aplikasi anak (lihat WebAuthController).
 Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [WebAuthController::class, 'login'])->name('login.attempt');
+Route::get('/login/google', [WebAuthController::class, 'redirectToGoogle'])->name('login.google');
+Route::get('/login/google/callback', [WebAuthController::class, 'handleGoogleCallback'])->name('login.google.callback');
 Route::post('/logout', [WebAuthController::class, 'logout'])->middleware('auth')->name('logout');

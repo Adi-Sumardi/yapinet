@@ -103,7 +103,7 @@ export default function AccessManager() {
             value={newUserEmail}
             onChange={(e) => setNewUserEmail(e.target.value)}
             className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink"
-            placeholder="nama@yayasan.id"
+            placeholder="nama@gmail.com"
           />
         </div>
         <button
@@ -115,7 +115,7 @@ export default function AccessManager() {
         </button>
         {createError && <p className="w-full text-xs text-red-600">{createError}</p>}
         <p className="w-full text-xs text-ink-faint">
-          Pengguna baru mendapat password default dan wajib menggantinya di login pertama.
+          Pengguna hanya bisa masuk dengan akun Google yang emailnya sama dengan email di sini.
         </p>
       </form>
 

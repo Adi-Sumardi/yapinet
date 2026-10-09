@@ -34,7 +34,8 @@
             width: 100%; padding: .75rem 1rem; margin-bottom: 1rem;
             border: 1px solid #dfe4ee; border-radius: 10px; font-size: .9rem;
         }
-        button {
+        button, a.button {
+            display: block; text-align: center; text-decoration: none;
             width: 100%; padding: .85rem; border: none; border-radius: 10px;
             background: #2f5fd0; color: #fff; font-weight: 600; font-size: .9rem; cursor: pointer;
         }

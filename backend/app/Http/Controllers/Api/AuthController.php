@@ -4,36 +4,42 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
-use App\Models\User;
 use App\Models\UserAppAccess;
 use App\Models\YapinetApp;
+use App\Services\GoogleAccountResolver;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
+use Laravel\Socialite\Facades\Socialite;
 
 /**
- * Login pakai email + password Yapinet sendiri (menggantikan login Google —
- * lihat migration add_password_to_users_table).
+ * Login PWA lewat Google — hanya untuk email yang sudah didaftarkan admin
+ * (lihat GoogleAccountResolver). Hasilnya Sanctum token untuk SPA.
  */
 class AuthController extends Controller
 {
-    public function login(Request $request): JsonResponse
+    public function redirect(): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+        return Socialite::driver('google')
+            ->stateless()
+            ->redirect();
+    }
 
-        $user = User::where('primary_email', $credentials['email'])->first();
+    public function callback(GoogleAccountResolver $resolver): RedirectResponse
+    {
+        $frontendUrl = rtrim(config('app.frontend_url'), '/');
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => 'Email atau password salah.',
-            ]);
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+        } catch (\Throwable) {
+            return redirect()->away("{$frontendUrl}/login?error=google_failed");
         }
 
-        abort_if($user->status === 'suspended', 403, 'Akun Anda dinonaktifkan. Hubungi Admin Yayasan.');
+        $user = $resolver->resolve($googleUser);
+
+        if (is_string($user)) {
+            return redirect()->away("{$frontendUrl}/login?error={$user}");
+        }
 
         // Pastikan user punya akses ke setiap aplikasi aktif — dijalankan
         // tiap login supaya aplikasi baru yang ditambahkan ke App Registry
@@ -48,38 +54,12 @@ class AuthController extends Controller
         AuditLog::create([
             'user_id' => $user->id,
             'action' => 'login',
-            'metadata' => ['via' => 'password'],
+            'metadata' => ['via' => 'google'],
         ]);
 
         $token = $user->createToken('yapinet-pwa')->plainTextToken;
 
-        return response()->json([
-            'token' => $token,
-            'must_change_password' => $user->must_change_password,
-        ]);
-    }
-
-    public function changePassword(Request $request): JsonResponse
-    {
-        $data = $request->validate([
-            'current_password' => 'required|string',
-            'new_password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user = $request->user();
-
-        if (! Hash::check($data['current_password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'current_password' => 'Password lama salah.',
-            ]);
-        }
-
-        $user->update([
-            'password' => $data['new_password'],
-            'must_change_password' => false,
-        ]);
-
-        return response()->json(['message' => 'Password berhasil diganti.']);
+        return redirect()->away("{$frontendUrl}/auth/callback?token={$token}");
     }
 
     public function me(Request $request): JsonResponse
@@ -97,7 +77,6 @@ class AuthController extends Controller
                 'primary_email' => $user->primary_email,
                 'status' => $user->status,
                 'is_admin' => $user->is_admin,
-                'must_change_password' => $user->must_change_password,
             ],
             'app_access' => $access,
         ]);

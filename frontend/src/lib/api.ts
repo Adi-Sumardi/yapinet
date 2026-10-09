@@ -13,6 +13,10 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY)
 }
 
+export function googleLoginUrl(): string {
+  return `${API_URL}/api/auth/google/redirect`
+}
+
 class ApiError extends Error {
   status: number
 
@@ -68,7 +72,6 @@ export type Me = {
     primary_email: string
     status: 'active' | 'pending' | 'suspended'
     is_admin: boolean
-    must_change_password: boolean
   }
   app_access: unknown[]
 }
@@ -99,13 +102,6 @@ export const api = {
   handoff: (code: string, path?: string) =>
     request<{ redirect_url: string }>(`/api/apps/${code}/handoff${path ? `?path=${encodeURIComponent(path)}` : ''}`),
   logout: () => request('/api/auth/logout', { method: 'POST' }),
-  login: (email: string, password: string) =>
-    request<{ token: string; must_change_password: boolean }>('/api/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    }),
-  changePassword: (payload: { current_password: string; new_password: string; new_password_confirmation: string }) =>
-    request('/api/auth/change-password', { method: 'POST', body: JSON.stringify(payload) }),
 
   adminUsers: () => request<AdminUser[]>('/api/admin/users'),
   adminCreateUser: (payload: { full_name: string; primary_email: string }) =>

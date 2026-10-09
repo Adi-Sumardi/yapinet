@@ -4,9 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Passport\Client;
+use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\User as SocialiteUser;
 use Tests\TestCase;
 
 class OAuthSsoTest extends TestCase
@@ -94,9 +95,7 @@ class OAuthSsoTest extends TestCase
 
     public function test_guest_is_sent_to_web_login_then_back_to_authorize(): void
     {
-        $user = User::factory()->create([
-            'password' => Hash::make('secret123'),
-        ]);
+        $user = User::factory()->create();
         $client = $this->makeClient();
 
         $authorizeUrl = '/oauth/authorize?'.http_build_query([
@@ -109,10 +108,10 @@ class OAuthSsoTest extends TestCase
         $guestResponse = $this->get($authorizeUrl);
         $guestResponse->assertRedirect('/login');
 
-        $loginResponse = $this->from($authorizeUrl)->post('/login', [
-            'email' => $user->primary_email,
-            'password' => 'secret123',
-        ]);
+        $googleUser = (new SocialiteUser)->map(['id' => 'google-sub-1', 'email' => $user->primary_email]);
+        Socialite::shouldReceive('driver->redirectUrl->user')->andReturn($googleUser);
+
+        $this->get('/login/google/callback')->assertRedirect($authorizeUrl);
 
         $this->assertAuthenticatedAs($user);
 

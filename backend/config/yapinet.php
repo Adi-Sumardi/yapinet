@@ -1,9 +1,7 @@
 <?php
 
 return [
-    // Password awal yang diberikan ke user yang belum pernah set password
-    // sendiri (user lama hasil migrasi dari login Google, atau user baru
-    // yang dibuat admin). User wajib menggantinya lewat /auth/change-password
-    // sebelum bisa memakai aplikasi (lihat users.must_change_password).
+    // Hanya dipakai migration add_password_to_users_table. Login password
+    // sudah tidak dipakai lagi (kembali ke Google, khusus email terdaftar).
     'default_password' => env('YAPINET_DEFAULT_PASSWORD', 'Yapinet@2026'),
 ];
