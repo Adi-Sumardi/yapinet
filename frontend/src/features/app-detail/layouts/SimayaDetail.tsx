@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import type { SummaryCard } from '../lib/api'
-import { formatRupiah } from '../lib/format'
+import type { SummaryCard } from '../../../lib/types'
+import { formatRupiah } from '../../../lib/format'
 
 /**
  * Tampilan khusus Simaya (manajemen aset) — data diambil dari details{} pada

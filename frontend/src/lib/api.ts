@@ -1,8 +1,31 @@
+import type {
+  AdminApp,
+  AdminAppPayload,
+  AdminUser,
+  AppDetail,
+  AuditLogEntry,
+  ConnectionTestResult,
+  Me,
+  MenuItem,
+  MenuMeta,
+  OpenMode,
+  Paginated,
+  PublicSettings,
+  SettingItem,
+  UserAccess,
+} from './types'
+
+export type * from './types'
+
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 const TOKEN_KEY = 'yapinet_token'
 
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY)
+  try {
+    return localStorage.getItem(TOKEN_KEY)
+  } catch {
+    return null
+  }
 }
 
 export function setToken(token: string): void {
@@ -10,34 +33,52 @@ export function setToken(token: string): void {
 }
 
 export function clearToken(): void {
-  localStorage.removeItem(TOKEN_KEY)
+  try {
+    localStorage.removeItem(TOKEN_KEY)
+  } catch {
+    // storage tidak tersedia (mode privat) — tidak ada yang perlu dihapus
+  }
 }
 
 export function googleLoginUrl(): string {
   return `${API_URL}/api/auth/google/redirect`
 }
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number
+  errors: Record<string, string[]>
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, errors: Record<string, string[]> = {}) {
     super(message)
     this.status = status
+    this.errors = errors
+  }
+
+  /** Pesan pertama untuk field tertentu (respons 422). */
+  field(name: string): string | undefined {
+    return this.errors[name]?.[0]
   }
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken()
+  const isJsonBody = typeof options.body === 'string'
 
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  })
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: {
+        Accept: 'application/json',
+        ...(isJsonBody ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    })
+  } catch {
+    // CDN Hostinger kadang membalas 429 tanpa header CORS → fetch gagal total.
+    throw new ApiError(0, 'Tidak bisa terhubung ke server. Periksa koneksi lalu coba lagi.')
+  }
 
   if (response.status === 401) {
     clearToken()
@@ -46,7 +87,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
-    throw new ApiError(response.status, body.message ?? 'Terjadi kesalahan.')
+    const fallback =
+      response.status === 429 ? 'Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.' : 'Terjadi kesalahan.'
+    throw new ApiError(response.status, body.message ?? fallback, body.errors ?? {})
   }
 
   if (response.status === 204) {
@@ -56,65 +99,84 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export type SummaryCard = {
-  app_code: string
-  app_name: string
-  app_icon_url: string | null
-  unit: { id: string; name: string } | null
-  status: 'ok' | 'warning' | 'critical' | 'degraded'
-  headline: string | null
-  metrics: { label: string; value: string | number }[]
-  details: Record<string, unknown>
-  fetched_at: string | null
-  can_act: boolean
-}
+const json = (method: string, body?: unknown): RequestInit => ({
+  method,
+  body: body === undefined ? undefined : JSON.stringify(body),
+})
 
-export type Me = {
-  user: {
-    id: string
-    full_name: string
-    primary_email: string
-    status: 'active' | 'pending' | 'suspended'
-    is_admin: boolean
+const qs = (params: Record<string, string | number | undefined>) => {
+  const search = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== '') search.set(key, String(value))
   }
-  app_access: unknown[]
+  const str = search.toString()
+  return str ? `?${str}` : ''
 }
 
-export type AdminUser = {
-  id: string
-  full_name: string
-  primary_email: string
-  status: 'active' | 'pending' | 'suspended'
-  is_admin: boolean
-}
-
-export type AdminApp = { id: string; code: string; name: string }
-
-export type AdminGrant = {
-  id: string
-  user_id: string
-  app_id: string
-  app: AdminApp
-}
+type Data<T> = { data: T }
 
 export const api = {
+  publicSettings: () => request<Data<PublicSettings>>('/api/settings/public').then((r) => r.data),
   me: () => request<Me>('/api/me'),
-  dashboardSummary: () => request<{ cards: SummaryCard[] }>('/api/dashboard/summary'),
-  refreshApp: (code: string) => request(`/api/apps/${code}/refresh`, { method: 'POST' }),
-  handoff: (code: string, path?: string) =>
-    request<{ redirect_url: string }>(`/api/apps/${code}/handoff${path ? `?path=${encodeURIComponent(path)}` : ''}`),
-  logout: () => request('/api/auth/logout', { method: 'POST' }),
+  logout: () => request('/api/auth/logout', json('POST')),
 
-  adminUsers: () => request<{ data: AdminUser[] }>('/api/admin/users?per_page=100').then((r) => r.data),
-  adminCreateUser: (payload: { full_name: string; primary_email: string }) =>
-    request<AdminUser>('/api/admin/users', { method: 'POST', body: JSON.stringify(payload) }),
-  adminDeleteUser: (userId: string) => request(`/api/admin/users/${userId}`, { method: 'DELETE' }),
-  adminApps: () =>
-    request<{ data: (AdminApp & { is_active: boolean })[] }>('/api/admin/apps').then((r) =>
-      r.data.filter((app) => app.is_active),
+  menu: () => request<{ data: MenuItem[]; meta: MenuMeta }>('/api/menu'),
+  app: (slug: string) => request<Data<AppDetail>>(`/api/apps/${slug}`).then((r) => r.data),
+  refreshApp: (slug: string) => request<Data<AppDetail>>(`/api/apps/${slug}/refresh`, json('POST')).then((r) => r.data),
+  openApp: (slug: string, path?: string) =>
+    request<Data<{ redirect_url: string; open_mode: OpenMode }>>(`/api/apps/${slug}/open${qs({ path })}`).then(
+      (r) => r.data,
     ),
-  adminGrants: (userId: string) => request<AdminGrant[]>(`/api/admin/access?user_id=${userId}`),
-  adminGrant: (payload: { user_id: string; app_id: string }) =>
-    request<AdminGrant>('/api/admin/access', { method: 'POST', body: JSON.stringify(payload) }),
-  adminRevoke: (grantId: string) => request(`/api/admin/access/${grantId}`, { method: 'DELETE' }),
+
+  admin: {
+    apps: () => request<Data<AdminApp[]>>('/api/admin/apps').then((r) => r.data),
+    app: (id: string) => request<Data<AdminApp>>(`/api/admin/apps/${id}`).then((r) => r.data),
+    createApp: (payload: AdminAppPayload) =>
+      request<Data<AdminApp>>('/api/admin/apps', json('POST', payload)).then((r) => r.data),
+    updateApp: (id: string, payload: AdminAppPayload) =>
+      request<Data<AdminApp>>(`/api/admin/apps/${id}`, json('PUT', payload)).then((r) => r.data),
+    deleteApp: (id: string) => request<void>(`/api/admin/apps/${id}`, json('DELETE')),
+    reorderApps: (ids: string[]) => request<void>('/api/admin/apps/reorder', json('POST', { ids })),
+    refreshApp: (id: string) =>
+      request<Data<{ ok: boolean; message: string | null; app: AdminApp }>>(
+        `/api/admin/apps/${id}/refresh`,
+        json('POST'),
+      ).then((r) => r.data),
+    testConnection: (payload: {
+      summary_url: string
+      auth_type: string
+      auth_header?: string | null
+      api_key?: string
+      app_id?: string
+    }) =>
+      request<Data<ConnectionTestResult>>('/api/admin/apps/test-connection', json('POST', payload)).then((r) => r.data),
+
+    users: (params: { search?: string; status?: string; page?: number } = {}) =>
+      request<Paginated<AdminUser>>(`/api/admin/users${qs(params)}`),
+    user: (id: string) => request<Data<AdminUser>>(`/api/admin/users/${id}`).then((r) => r.data),
+    createUser: (payload: { full_name: string; primary_email: string; is_admin?: boolean }) =>
+      request<Data<AdminUser>>('/api/admin/users', json('POST', payload)).then((r) => r.data),
+    updateUser: (id: string, payload: Partial<Pick<AdminUser, 'full_name' | 'is_admin' | 'status'>>) =>
+      request<Data<AdminUser>>(`/api/admin/users/${id}`, json('PUT', payload)).then((r) => r.data),
+    deleteUser: (id: string) => request<void>(`/api/admin/users/${id}`, json('DELETE')),
+    userAccess: (id: string) => request<Data<UserAccess>>(`/api/admin/users/${id}/access`).then((r) => r.data),
+    setUserAccess: (id: string, appIds: string[]) =>
+      request<Data<UserAccess>>(`/api/admin/users/${id}/access`, json('PUT', { app_ids: appIds })).then((r) => r.data),
+
+    settings: () => request<{ data: SettingItem[]; meta: { groups: Record<string, string> } }>('/api/admin/settings'),
+    updateSettings: (values: Record<string, unknown>) =>
+      request<{ data: SettingItem[] }>('/api/admin/settings', json('PUT', { values })),
+    resetSetting: (key: string) => request<void>(`/api/admin/settings/${encodeURIComponent(key)}`, json('DELETE')),
+
+    auditLogs: (params: { action?: string; page?: number } = {}) =>
+      request<Paginated<AuditLogEntry>>(`/api/admin/audit-logs${qs(params)}`),
+
+    uploadImage: (file: File) => {
+      const body = new FormData()
+      body.append('file', file)
+      return request<Data<{ url: string }>>('/api/admin/uploads/image', { method: 'POST', body }).then(
+        (r) => r.data.url,
+      )
+    },
+  },
 }

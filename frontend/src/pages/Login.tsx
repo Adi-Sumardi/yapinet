@@ -1,18 +1,28 @@
-import { useSearchParams } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { googleLoginUrl } from '../lib/api'
-import LogoMark from '../components/LogoMark'
-import HeroPattern from '../components/HeroPattern'
+import { useAuth } from '../context/AuthContext'
+import { usePageTitle, useSettings } from '../context/SettingsContext'
+import LogoMark from '../components/layout/LogoMark'
+import HeroPattern from '../components/layout/HeroPattern'
+import { AlertIcon } from '../components/icons'
 
 const LOGIN_ERRORS: Record<string, string> = {
-  not_registered: 'Email Google Anda belum terdaftar di Yapinet. Minta Admin Yayasan menambahkan email Anda.',
+  not_registered: 'Email Google Anda belum terdaftar. Minta Admin Yayasan menambahkan email Anda.',
   suspended: 'Akun Anda dinonaktifkan. Hubungi Admin Yayasan.',
   google_failed: 'Gagal masuk dengan Google. Silakan coba lagi.',
 }
 
 export default function Login() {
+  usePageTitle('Masuk')
+  const settings = useSettings()
+  const { isAuthenticated } = useAuth()
   const [params] = useSearchParams()
   const errorCode = params.get('error')
   const error = errorCode ? (LOGIN_ERRORS[errorCode] ?? LOGIN_ERRORS.google_failed) : null
+
+  if (isAuthenticated) return <Navigate to="/" replace />
+
+  const contact = settings['contact.admin_whatsapp'] || settings['contact.admin_email']
 
   return (
     <div className="flex min-h-svh flex-col bg-surface md:flex-row">
@@ -20,34 +30,42 @@ export default function Login() {
         <HeroPattern />
         <div className="relative z-10 max-w-sm">
           <LogoMark size="lg" className="mx-auto mb-7" />
-          <h1 className="font-display text-2xl font-bold leading-snug md:text-3xl">
-            Satu Aplikasi, Semua Layanan Yayasan
-          </h1>
-          <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-white/75">
-            Yapinet menghubungkan akademik, keuangan, SDM, dan operasional dalam satu ekosistem super app.
-          </p>
+          <h1 className="font-display text-2xl font-bold leading-snug md:text-3xl">{settings['login.headline']}</h1>
+          {settings['login.subtitle'] && (
+            <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-white/75">{settings['login.subtitle']}</p>
+          )}
         </div>
-        <p className="absolute bottom-8 text-[11px] text-white/50">© 2026 Yayasan — Yapinet</p>
+        {settings['branding.footer_text'] && (
+          <p className="absolute bottom-8 text-[11px] text-white/50">{settings['branding.footer_text']}</p>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col justify-center px-6 py-10 md:px-16">
         <div className="mx-auto w-full max-w-sm">
-          <h2 className="font-display text-xl font-bold text-ink">Masuk ke Yapinet</h2>
+          <h2 className="font-display text-xl font-bold text-ink">Masuk ke {settings['branding.app_name']}</h2>
           <p className="mt-1 text-sm text-ink-soft">
             Masuk dengan akun Google yang sudah didaftarkan oleh Admin Yayasan.
           </p>
 
-          {error && <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
+          {error && (
+            <div className="mt-5 flex gap-3 rounded-2xl bg-crit-soft p-4 text-sm text-crit" role="alert">
+              <AlertIcon className="mt-0.5 shrink-0" />
+              <p>{error}</p>
+            </div>
+          )}
 
           <a
             href={googleLoginUrl()}
-            className="tap-scale mt-7 flex items-center justify-center gap-3 rounded-xl border border-line bg-surface px-5 py-4 shadow-sm"
+            className="tap-scale mt-7 flex items-center justify-center gap-3 rounded-xl border border-line bg-surface px-5 py-4 shadow-sm transition-shadow hover:shadow-md"
           >
             <GoogleIcon />
             <span className="text-sm font-semibold text-ink">Masuk dengan Google</span>
           </a>
 
-          <p className="mt-7 text-center text-xs text-ink-faint">Butuh bantuan akses? Hubungi Admin Yayasan.</p>
+          {settings['login.help_text'] && (
+            <p className="mt-7 text-center text-xs text-ink-faint">{settings['login.help_text']}</p>
+          )}
+          {contact && <p className="mt-1 text-center text-xs font-semibold text-ink-soft">{contact}</p>}
         </div>
       </div>
     </div>

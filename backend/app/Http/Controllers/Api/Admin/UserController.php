@@ -42,6 +42,11 @@ class UserController extends Controller
         return (new UserResource($user->loadCount(['appAccess', 'googleIdentities'])))->response()->setStatusCode(201);
     }
 
+    public function show(User $user): UserResource
+    {
+        return new UserResource($user->loadCount(['appAccess', 'googleIdentities']));
+    }
+
     public function update(UpdateUserRequest $request, User $user, AuditLogger $audit): UserResource
     {
         $user->update($request->validated());

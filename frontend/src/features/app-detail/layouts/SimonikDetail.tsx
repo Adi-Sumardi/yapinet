@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { SummaryCard } from '../lib/api'
+import type { SummaryCard } from '../../../lib/types'
 
 /**
  * Tampilan khusus Simonik (meeting, notulensi, follow up) — data diambil

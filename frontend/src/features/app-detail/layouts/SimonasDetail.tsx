@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { SummaryCard } from '../lib/api'
+import type { SummaryCard } from '../../../lib/types'
 
 /**
  * Tampilan khusus Simonas (monitoring warga asrama) — data diambil dari

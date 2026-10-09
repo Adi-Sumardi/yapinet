@@ -88,4 +88,11 @@ class AdminUserTest extends TestCase
 
         $this->assertEqualsCanonicalizing([$b->id, $c->id], $user->appAccess()->pluck('app_id')->all());
     }
+
+    public function test_show_returns_single_user(): void
+    {
+        $user = User::factory()->create(['full_name' => 'Siti']);
+
+        $this->actingAs($this->admin)->getJson("/api/admin/users/{$user->id}")->assertOk()->assertJsonPath('data.full_name', 'Siti');
+    }
 }

@@ -38,7 +38,8 @@ src/
    ikon, urutan → selalu dari `/api/menu`.
 6. **Styling: Tailwind + token** (`design.md`). Inline `style` hanya untuk
    nilai dinamis dari data (warna menu).
-7. **Form**: komponen terkontrol + state lokal; tampilkan error per field dari
+7. **Form**: selalu `<form noValidate>` — popup validasi bawaan browser ("Please fill out this field") dilarang,
+   sama seperti `window.alert`. Komponen terkontrol + state lokal; tampilkan error per field dari
    respons 422 (`errors.{field}[0]`). Tombol submit disable saat `isPending`.
 8. **Dilarang `window.alert` / `window.confirm` / `window.prompt`.** Aksi
    berbahaya → `useConfirm()` (ConfirmDialog); umpan balik → `useToast()`.
@@ -63,7 +64,7 @@ src/
 | `Card` | `title?`, `actions?` | `rounded-2xl border-line-soft` |
 | `Badge` | `tone: info\|ok\|warning\|critical\|neutral` | |
 | `StatusDot` | `status` | |
-| `Modal` / `Drawer` | `open`, `onClose`, `title` | Drawer untuk form menu di desktop |
+| `Modal` | `title`, `onClose`, `footer?` | bottom sheet di mobile; untuk form singkat (mis. tambah pengguna) |
 | `ConfirmDialog` + `ConfirmProvider` | `title`, `description`, `confirmLabel`, `tone: danger\|warning\|default`, `requireText?` | dipanggil via `const ok = await confirm({...})`; bottom sheet di mobile |
 | `Toaster` + `useToast` | `toast.success/error/warning/info(title, { description, action, duration })`, `toast.promise(p, msgs)` | dipasang sekali di `App.tsx`; animasi & tumpukan sesuai `design.md` |
 | `Tabs` | `items`, `value` | dipakai halaman Pengaturan |

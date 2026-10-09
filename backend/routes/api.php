@@ -55,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/users/{user}/access', [UserAccessController::class, 'show']);
         Route::put('/users/{user}/access', [UserAccessController::class, 'update']);
-        Route::apiResource('users', UserController::class)->except('show');
+        Route::apiResource('users', UserController::class);
 
         Route::get('/settings', [AdminSettingController::class, 'index']);
         Route::put('/settings', [AdminSettingController::class, 'update']);

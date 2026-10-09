@@ -15,7 +15,7 @@ Yapinet punya dua jenis "view":
 | `/akun` | `pages/Account.tsx` | user | profil, daftar aplikasi yang diakses, keluar |
 | `/admin` | → redirect `/admin/menu` | admin | |
 | `/admin/menu` | `pages/admin/AppsPage.tsx` | admin | daftar menu + urutkan |
-| `/admin/menu/baru` | `pages/admin/AppEditPage.tsx` | admin | form tambah (mobile); desktop pakai Drawer |
+| `/admin/menu/baru` | `pages/admin/AppEditPage.tsx` | admin | form tambah (halaman penuh di semua ukuran layar) |
 | `/admin/menu/:id` | `pages/admin/AppEditPage.tsx` | admin | form ubah |
 | `/admin/pengguna` | `pages/admin/UsersPage.tsx` | admin | daftar pengguna |
 | `/admin/pengguna/:id` | `pages/admin/UserEditPage.tsx` | admin | profil + `AccessMatrix` |

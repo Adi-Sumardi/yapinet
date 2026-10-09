@@ -277,7 +277,7 @@ merusak fase sebelumnya.
 - Admin API: apps CRUD + reorder + test-connection; users CRUD; settings.
 - Fetcher membaca URL API lengkap + mode auth dari tabel.
 
-### Fase 2 — Fondasi frontend
+### Fase 2 — Fondasi frontend ✅ selesai 2026-10-09
 - UI kit (`components/ui`), `AppShell`, `AdminLayout`.
 - Dashboard & detail membaca `/api/menu` (hapus `appSlugs.ts`, `appIcons.ts`).
 - Halaman admin: Menu, Pengguna, Pengaturan, Log.

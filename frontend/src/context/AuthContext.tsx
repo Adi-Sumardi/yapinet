@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { api, clearToken, getToken, type Me } from '../lib/api'
 
 type AuthState = {
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthState | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null)
   const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
 
   const refresh = async () => {
     if (!getToken()) {
@@ -38,6 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       clearToken()
       setMe(null)
+      // Jangan tinggalkan data user sebelumnya di cache (menu, admin, dll).
+      queryClient.clear()
     }
   }
 
