@@ -3,12 +3,12 @@
 # deploy.sh — Deploy backend Yapinet ke Hostinger Business Shared Hosting
 #
 # Jalankan DI SERVER (lewat SSH/Termius), dari dalam folder backend:
-#     cd ~/yapinet/backend && bash deploy.sh
+#     cd ~/domains/yapinet.id/public_html/yapinet/backend && bash deploy.sh
 #
 # Prasyarat satu kali (lewat hPanel, bukan lewat script ini):
 #   1. Subdomain api.yapinet.id dibuat, document root diarahkan ke
-#      ~/yapinet/backend/public (BUKAN ke folder backend itu sendiri).
-#   2. File .env sudah ada di ~/yapinet/backend (isi dari .env.example,
+#      <clone>/backend/public (BUKAN ke folder backend itu sendiri).
+#   2. File .env sudah ada di <clone>/backend (isi dari .env.example,
 #      APP_URL=https://api.yapinet.id, FRONTEND_URL=https://yapinet.id,
 #      SANCTUM_STATEFUL_DOMAINS=yapinet.id, DB_* sesuai database MySQL
 #      yang dibuat di hPanel, GOOGLE_CLIENT_ID/SECRET, dan
@@ -59,7 +59,10 @@ git pull origin "$BRANCH"
 echo ""
 
 # ── 2. Composer (skip kalau composer.lock tidak berubah) ────────────────────
-if git diff "$BEFORE_COMMIT" --name-only | grep -q "^composer.lock$"; then
+# Pathspec relatif ke folder backend/ — dulu memakai grep "^composer.lock$"
+# yang tidak pernah cocok karena git diff mengeluarkan "backend/composer.lock",
+# sehingga composer install tidak pernah jalan.
+if ! git diff --quiet "$BEFORE_COMMIT" HEAD -- composer.lock || [ ! -f vendor/autoload.php ]; then
     echo "📦  [2/6] composer install --no-dev --optimize-autoloader..."
     COMPOSER="$(command -v composer || true)"
     [ -z "$COMPOSER" ] && { echo "❌  composer tidak ditemukan di PATH."; exit 1; }
