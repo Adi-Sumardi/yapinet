@@ -46,7 +46,7 @@ class SafeUrlValidator
         }
 
         // Resolver sistem tidak punya batas waktu: host dengan DNS rusak
-        // (mis. simaya.yapi.web.id, 2026-10) bisa menahan request ~45 dtk.
+        // (mis. domain lama simaya.yapi.web.id, 2026-10) bisa menahan request ~45 dtk.
         // Kegagalan di-cache 10 menit supaya Segarkan/Tes Koneksi tidak
         // menggantung berulang kali.
         $failKey = "dns-fail:{$host}";

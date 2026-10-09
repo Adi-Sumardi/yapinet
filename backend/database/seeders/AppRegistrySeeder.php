@@ -22,7 +22,7 @@ class AppRegistrySeeder extends Seeder
     {
         $apps = [
             ['SNGR', 'sianggar', 'Sianggar', 'SG', '#3E7CB1', 'Aplikasi Pengajuan Anggaran', 'https://sianggar.yapinet.id', true, 'sianggar'],
-            ['SMYA', 'simaya', 'Simaya', 'SM', '#4CAF7D', 'Aplikasi Sistem Manajemen Aset YAPI', 'https://simaya.yapi.web.id', true, 'simaya'],
+            ['SMYA', 'simaya', 'Simaya', 'SM', '#4CAF7D', 'Aplikasi Sistem Manajemen Aset YAPI', 'https://simaya.yapinet.id', true, 'simaya'],
             ['SMNS', 'simonas', 'Simonas', 'SN', '#9C5FC0', 'Aplikasi Sistem Monitoring Warga Asrama', 'https://simonas.id', true, 'simonas'],
             ['SHRS', 'siharis', 'SiHaris', 'HR', '#1C1C1E', 'Aplikasi Sistem Manajemen Kepegawaian YAPI', 'https://shrs.yapinet.id', true, 'auto'],
             ['SIAK', 'siakad', 'SIAKAD', 'SA', '#E0A527', 'Aplikasi Sistem Informasi Akademik', 'https://siakad.yapinet.id', true, 'auto'],
