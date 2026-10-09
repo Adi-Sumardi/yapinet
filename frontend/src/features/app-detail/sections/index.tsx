@@ -288,22 +288,31 @@ function ChartSection({ section }: { section: Extract<Section, { type: 'chart' }
 /** Kolom vertikal per periode; kolom terakhir disorot (periode berjalan). */
 function ColumnChart({ section }: { section: Extract<Section, { type: 'chart' }> }) {
   const max = Math.max(section.format === 'percent' ? 1 : 0, ...section.items.map((i) => Number(i.value) || 0)) || 1
-  const last = section.items.length - 1
+  const count = section.items.length
+  const last = count - 1
   return (
     <SectionCard title={section.title}>
-      <div className="flex h-44 items-end gap-2" role="img" aria-label={section.title}>
+      <div className="flex h-44 gap-2" role="img" aria-label={section.title}>
         {section.items.map((item, i) => {
           const current = section.highlight_last && i === last
+          const ratio = Math.max(0.02, (Number(item.value) || 0) / max)
           return (
-            <div key={i} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5">
-              <span className={`text-[11px] tabular-nums ${current ? 'font-semibold text-ink' : 'text-ink-soft'}`}>
-                {formatValue(item.value, section.format)}
-              </span>
-              <div
-                className={`w-full rounded-t-lg rounded-b ${current ? 'bg-accent' : 'bg-accent/40'}`}
-                style={{ height: `${Math.max(2, ((Number(item.value) || 0) / max) * 100)}%` }}
-              />
-              <span className={`truncate text-[11px] ${current ? 'font-semibold text-ink' : 'text-ink-soft'}`}>
+            <div
+              key={i}
+              className="flex min-w-0 flex-1 flex-col items-center gap-1.5"
+              title={`${item.label}: ${formatValue(item.value, section.format)}`}
+            >
+              {/* Angka + batang berbagi ruang di atas label, jadi batang tertinggi tidak mendorong label turun. */}
+              <div className="flex w-full flex-1 flex-col items-center justify-end gap-1.5">
+                <span className={`text-[11px] tabular-nums ${current ? 'font-semibold text-ink' : 'text-ink-soft'}`}>
+                  {formatValue(item.value, section.format)}
+                </span>
+                <div
+                  className={`w-full rounded-t-lg rounded-b ${current ? 'bg-accent' : 'bg-accent/40'}`}
+                  style={{ height: `calc((100% - 1.25rem) * ${ratio})` }}
+                />
+              </div>
+              <span className={`w-full truncate text-center text-[11px] ${sparseLabel(i, count)} ${current ? 'font-semibold text-ink' : 'text-ink-soft'}`}>
                 {item.label}
               </span>
             </div>
@@ -312,6 +321,11 @@ function ColumnChart({ section }: { section: Extract<Section, { type: 'chart' }>
       </div>
     </SectionCard>
   )
+}
+
+/** Banyak kolom di layar sempit: label selang-seling disembunyikan (ruangnya tetap) supaya tidak bertumpuk. */
+function sparseLabel(index: number, count: number): string {
+  return count > 8 && index % 2 === 1 && index !== count - 1 ? 'max-sm:invisible' : ''
 }
 
 /** Kolom bertumpuk per periode (mis. hadir tepat waktu vs terlambat). */
@@ -333,7 +347,7 @@ function StackedChart({ section }: { section: Extract<Section, { type: 'chart' }
                 <div key={s.key} className={TONE_BAR[s.tone ?? 'info']} style={{ flex: Number(item[s.key]) || 0 }} />
               ))}
             </div>
-            <span className="truncate text-[11px] text-ink-soft">{item.label}</span>
+            <span className={`w-full truncate text-center text-[11px] text-ink-soft ${sparseLabel(i, section.items.length)}`}>{item.label}</span>
           </div>
         ))}
       </div>
@@ -414,12 +428,40 @@ function AlertSection({ section }: { section: Extract<Section, { type: 'alert' }
 /** Tabel, funnel, statistik & peringatan memakai lebar penuh; lainnya berpasangan 2 kolom. */
 const FULL_WIDTH = new Set(['table', 'funnel', 'stats', 'alert'])
 
+/** Grafik dengan banyak kolom butuh lebar penuh supaya labelnya terbaca. */
+const LONG_CHART = 8
+
+function isWide(section: Section): boolean {
+  return FULL_WIDTH.has(section.type) || (section.type === 'chart' && section.items.length > LONG_CHART)
+}
+
+/**
+ * Section setengah lebar dipasangkan berurutan; yang tidak punya pasangan
+ * (diapit section lebar atau paling akhir) dibuat lebar penuh agar tidak
+ * menyisakan ruang kosong.
+ */
+function fullSpans(sections: Section[]): boolean[] {
+  const wide = sections.map(isWide)
+  const spans: boolean[] = []
+  for (let i = 0; i < sections.length; ) {
+    if (!wide[i] && i + 1 < sections.length && !wide[i + 1]) {
+      spans.push(false, false)
+      i += 2
+    } else {
+      spans.push(true)
+      i += 1
+    }
+  }
+  return spans
+}
+
 /** Memilih renderer berdasarkan type; tipe tak dikenal diabaikan diam-diam. */
 export default function SectionRenderer({ sections, onOpen }: { sections: Section[]; onOpen: OpenPath }) {
+  const spans = fullSpans(sections)
   return (
     <div className="grid gap-5 md:grid-cols-2">
       {sections.map((section, i) => (
-        <div key={i} className={`min-w-0 ${FULL_WIDTH.has(section.type) ? 'md:col-span-2' : ''}`}>
+        <div key={i} className={`min-w-0 ${spans[i] ? 'md:col-span-2' : ''}`}>
           {renderSection(section, onOpen)}
         </div>
       ))}
