@@ -86,33 +86,29 @@ deploy-frontend.sh, backend/deploy.sh
 | [formatting.md](formatting.md) | Format angka/tanggal/teks + formatter kode |
 | [code-style.md](code-style.md) | Gaya kode PHP & TypeScript, penamaan, git |
 | [security.md](security.md) | Auth, otorisasi, secret, SSRF, hosting |
+| [detail-pages.md](detail-pages.md) | **Analisis & desain halaman detail per aplikasi**, kontrak v1.1 |
 
-## Gap yang diketahui (per 2026-10-09)
+## Gap yang diketahui (diperbarui 2026-10-09, setelah Fase 0–4)
 
-Ini daftar masalah nyata di kode sekarang. Penataan ulang harus menutupnya.
+Sudah ditutup:
 
-1. **Menu hardcoded** — `frontend/src/lib/appSlugs.ts`, `appIcons.ts`,
-   `CUSTOM_DETAIL` di `pages/AppDetail.tsx`, `$order` di
-   `DashboardController`, `AppAdapterResolver::$map`, `AppRegistrySeeder`.
-2. **Tile dashboard bergantung cache** — aplikasi baru tidak muncul sampai
-   scheduler membuat baris `app_summary_cache`.
-3. ~~**Auto-grant terlalu lebar**~~ (**diperbaiki di Fase 0**: grant sekali saat user dibuat) — `AuthController::callback` memberi semua
-   aplikasi aktif ke semua user sebagai `bph` + `can_act=true` di setiap login,
-   sehingga pencabutan akses di panel admin akan dibatalkan di login berikutnya.
-4. **Unique index dengan NULL** — `unique(app_id, unit_id)` di
-   `app_summary_cache` & `user_app_access`: di MySQL, `NULL` dianggap berbeda
-   sehingga duplikat baris "semua unit" tetap bisa terjadi.
-5. ~~`deploy.sh` tidak pernah `composer install`~~ — **diperbaiki di Fase 0**.
-6. **Repo ter-clone di dalam `public_html`** — sekarang aman (403), tapi
-   rapuh; target: pindah ke luar `public_html`.
-7. **CDN Hostinger meng-cache file entry** (`sw.js`, `index.html`) 7 hari dan
-   pernah me-rate-limit (429) API. API seharusnya tidak lewat CDN cache.
-8. **`laravel.log` 62 MB** tanpa rotasi — pakai `LOG_CHANNEL=daily`.
-9. **Header halaman diduplikasi** di Dashboard/Settings/AppDetail;
-   `components/TopBar.tsx` tidak dipakai.
-10. **Kolom/tabel legacy**: `users.password`, `users.must_change_password`,
-    `notifications` (tidak dipakai), `app_credentials.*_encrypted` (nama
-    menyesatkan — nilai sudah dienkripsi oleh cast, bukan oleh nama kolom).
-11. ~~Tidak ada Prettier/Pint di workflow~~ — **selesai di Fase 0**
-    (lint frontend memakai oxlint: `npm run lint`).
-12. **Unit hanya "Kantor Yayasan"** — fitur per-unit belum benar-benar dipakai.
+1. ~~Menu hardcoded di 6 tempat~~ — Fase 1–2 (menu dari tabel `apps`, admin CRUD).
+2. ~~Tile dashboard bergantung cache~~ — Fase 1 (`GET /api/menu`).
+3. ~~Auto-grant di setiap login~~ — Fase 0 (`GrantDefaultAccess`, sekali saat dibuat).
+4. ~~Unique index dengan NULL~~ — Fase 1 (`scope_key`).
+5. ~~`deploy.sh` tidak pernah `composer install`~~ — Fase 0.
+6. ~~File repo bisa diunduh lewat `yapinet.id/yapinet/*`~~ — Fase 4 (403 via `.htaccess`).
+   Repo masih ter-clone di `public_html`; pindah ke luar tetap disarankan.
+7. ~~CDN Hostinger (cache `sw.js` & 429)~~ — CDN dinonaktifkan di hPanel; service
+   worker tidak didaftarkan lagi dan dibersihkan otomatis.
+8. ~~`laravel.log` tanpa rotasi~~ — Fase 0 (`LOG_STACK=daily`, level warning).
+9. ~~Header diduplikasi~~ — Fase 2 (`AppShell`, `AdminLayout`).
+10. ~~Kolom/tabel legacy~~ — Fase 1 & 4 (`api_key`, password & `notifications` dihapus).
+11. ~~Tidak ada formatter~~ — Fase 0 (Pint, Prettier, oxlint).
+
+Masih terbuka:
+
+12. **Unit hanya "Kantor Yayasan"** di sisi Yapinet — filter unit kini disediakan
+    tiap aplikasi (`filters[]`, lihat [detail-pages.md](detail-pages.md)).
+13. **SIAKAD, PMB, SiHaris belum punya endpoint ringkasan** (404).
+14. **Kredensial di repo aplikasi anak** — lihat catatan keamanan di `security.md` §9.

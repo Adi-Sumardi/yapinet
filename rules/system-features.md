@@ -284,11 +284,14 @@ merusak fase sebelumnya.
 - Branding dari `/api/settings/public`.
 
 ### Fase 3 — Kontrak v1 + renderer generik
-- Renderer `sections[]`.
-- Bantu tiap aplikasi anak mengirim `sections[]`; hapus komponen khusus
+- ✅ Renderer `sections[]` (Fase 2).
+- 🎨 Desain ulang halaman detail + kontrak v1.1: [detail-pages.md](detail-pages.md) (menunggu persetujuan).
+- Bantu tiap aplikasi anak mengirim kontrak v1.1; hapus komponen khusus
   begitu aplikasinya siap.
 
-### Fase 4 — Hardening
-- Tes fitur (backend) untuk semua endpoint admin & menu.
-- Pindah clone repo ke luar `public_html`; atur CDN agar tidak meng-cache API.
-- Rate limit per user, review keamanan (`security.md`).
+### Fase 4 — Hardening ✅ selesai 2026-10-09
+- ✅ Tes fitur backend untuk endpoint admin & menu (37 tes).
+- ✅ Blokir akses web ke file repo; CDN Hostinger dinonaktifkan.
+- ✅ Rate limit default 120/menit/user; token Sanctum 30 hari + prune harian.
+- ✅ Endpoint & kolom legacy dihapus; `deploy.sh` backup DB sebelum migrasi.
+- ⏳ Opsional: pindah clone repo ke luar `public_html` (perlu ubah document root & cron di hPanel).

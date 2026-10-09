@@ -92,6 +92,17 @@ pembatasan, URL itu bisa diarahkan ke layanan internal hosting. Aturan
 - Ingat: 429/5xx dari CDN muncul di browser sebagai "CORS error" karena tidak
   membawa header CORS. Cek kode HTTP aslinya dulu (curl) sebelum mengubah CORS.
 
+## 9. Kredensial di repo aplikasi anak (temuan 2026-10-09)
+
+Ditemukan saat analisis (tidak diubah — repo milik aplikasi masing-masing):
+
+- `SiHaris/MEMORY.md` **ter-commit** berisi password SSH server, API key
+  gateway WhatsApp, dan secret gateway email → ganti semua kredensial itu,
+  hapus dari repo (dan riwayat git), simpan di `.env`/password manager.
+- `sekolah/MEMORY.md`, `pmb/memory.md` ter-commit — periksa apakah memuat kredensial.
+- Remote git `sianggar-next` memakai URL berisi GitHub personal access token →
+  cabut token di GitHub, ganti remote ke URL tanpa token.
+
 ## Checklist PR keamanan
 
 - [ ] Endpoint baru punya middleware & cek akses yang benar
