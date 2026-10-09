@@ -38,7 +38,12 @@ const STATUS_CLASS: Record<Pengajuan['status'], string> = {
 
 export default function SianggarDetail({ cards }: { cards: SummaryCard[] }) {
   const details = cards[0]?.details ?? {}
-  const defaultApbs = (details.apbs as Apbs | undefined) ?? { total_apbs: 0, disahkan_at: null, unit_count: 0, by_unit: [] }
+  const defaultApbs = (details.apbs as Apbs | undefined) ?? {
+    total_apbs: 0,
+    disahkan_at: null,
+    unit_count: 0,
+    by_unit: [],
+  }
   const defaultRealisasi = (details.realisasi as Realisasi | undefined) ?? { percent: 0, terealisasi: 0, sisa: 0 }
   const pengajuan = (details.pengajuan as Pengajuan[] | undefined) ?? []
   const tahunAjaranList = (details.tahun_ajaran as TahunAjaran[] | undefined) ?? []
@@ -84,7 +89,8 @@ export default function SianggarDetail({ cards }: { cards: SummaryCard[] }) {
           unit_count: selectedUnitApbs ? 1 : 0,
           by_unit: byUnit,
         }
-  const realisasi: Realisasi = unit === 'all' ? tahunRealisasi : selectedUnitApbs?.realisasi ?? { percent: 0, terealisasi: 0, sisa: 0 }
+  const realisasi: Realisasi =
+    unit === 'all' ? tahunRealisasi : (selectedUnitApbs?.realisasi ?? { percent: 0, terealisasi: 0, sisa: 0 })
 
   const filteredPengajuan = pengajuan.filter((p) => {
     if (unit !== 'all' && p.unit !== unit) return false
@@ -114,7 +120,9 @@ export default function SianggarDetail({ cards }: { cards: SummaryCard[] }) {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide text-ink-faint">Filter Tahun Ajaran</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-ink-faint">
+              Filter Tahun Ajaran
+            </label>
             <select
               value={tahunAjaran}
               onChange={(e) => setTahunAjaran(e.target.value)}
@@ -154,7 +162,11 @@ export default function SianggarDetail({ cards }: { cards: SummaryCard[] }) {
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">Disahkan</p>
             <p className="mt-1 text-lg font-bold text-ink">
               {apbs.disahkan_at
-                ? new Date(apbs.disahkan_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+                ? new Date(apbs.disahkan_at).toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })
                 : '—'}
             </p>
           </div>
@@ -237,7 +249,11 @@ export default function SianggarDetail({ cards }: { cards: SummaryCard[] }) {
               {filteredPengajuan.map((p, i) => (
                 <tr key={i} className="border-b border-line-soft last:border-0">
                   <td className="py-2.5 text-ink-soft">
-                    {new Date(p.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {new Date(p.tanggal).toLocaleDateString('id-ID', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
                   </td>
                   <td className="py-2.5 text-ink">{p.keterangan}</td>
                   <td className="py-2.5 font-semibold tabular-nums text-ink">{formatRupiah(p.nominal)}</td>

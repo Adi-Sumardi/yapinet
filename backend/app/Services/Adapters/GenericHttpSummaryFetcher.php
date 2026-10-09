@@ -34,9 +34,9 @@ class GenericHttpSummaryFetcher implements SummaryFetcher
         try {
             $client = $this->client();
 
-            $response = $client->get(rtrim($app->base_url, '/') . '/' . ltrim($app->summary_endpoint, '/'), [
+            $response = $client->get(rtrim($app->base_url, '/').'/'.ltrim($app->summary_endpoint, '/'), [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $credential->api_key_encrypted,
+                    'Authorization' => 'Bearer '.$credential->api_key_encrypted,
                     'Accept' => 'application/json',
                 ],
                 'query' => $unit ? ['unit_id' => $unit->getKey()] : [],
@@ -62,6 +62,6 @@ class GenericHttpSummaryFetcher implements SummaryFetcher
 
     protected function client(): Client
     {
-        return new Client();
+        return new Client;
     }
 }

@@ -57,8 +57,8 @@ export default function SimayaDetail({ cards }: { cards: SummaryCard[] }) {
   const [penyusutanVisible, setPenyusutanVisible] = useState(PAGE_SIZE)
 
   const selectedUnitStats = unit !== 'all' ? byUnit.find((u) => u.unit === unit) : undefined
-  const jumlahAset = unit === 'all' ? defaultJumlahAset : selectedUnitStats?.jumlah_aset ?? 0
-  const nilaiTotalAset = unit === 'all' ? defaultNilaiTotalAset : selectedUnitStats?.nilai_total_aset ?? 0
+  const jumlahAset = unit === 'all' ? defaultJumlahAset : (selectedUnitStats?.jumlah_aset ?? 0)
+  const nilaiTotalAset = unit === 'all' ? defaultNilaiTotalAset : (selectedUnitStats?.nilai_total_aset ?? 0)
 
   const asetRusakAll = sampleAsetRusak.filter((a) => unit === 'all' || a.unit === unit)
   const penyusutanAll = samplePenyusutan.filter((a) => unit === 'all' || a.unit === unit)
@@ -109,7 +109,7 @@ export default function SimayaDetail({ cards }: { cards: SummaryCard[] }) {
               {unit === 'all' ? 'Unit Tercakup' : 'Jumlah Lokasi/Ruangan'}
             </p>
             <p className="mt-1 text-lg font-bold text-ink">
-              {unit === 'all' ? byUnit.length : selectedUnitStats?.lokasi_count ?? 0}
+              {unit === 'all' ? byUnit.length : (selectedUnitStats?.lokasi_count ?? 0)}
             </p>
           </div>
         </div>
@@ -132,7 +132,11 @@ export default function SimayaDetail({ cards }: { cards: SummaryCard[] }) {
                 <tr key={i} className="border-b border-line-soft last:border-0">
                   <td className="py-2.5 text-ink">{a.nama}</td>
                   <td className="py-2.5 text-ink-soft">
-                    {new Date(a.tanggal_lapor).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {new Date(a.tanggal_lapor).toLocaleDateString('id-ID', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
                   </td>
                   <td className="py-2.5">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_CLASS[a.status]}`}>

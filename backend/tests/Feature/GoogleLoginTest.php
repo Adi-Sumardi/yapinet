@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\GoogleIdentity;
 use App\Models\AppSummaryCache;
+use App\Models\GoogleIdentity;
 use App\Models\User;
 use App\Models\UserAppAccess;
 use App\Models\YapinetApp;

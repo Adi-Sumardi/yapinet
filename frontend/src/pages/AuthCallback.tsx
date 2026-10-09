@@ -22,8 +22,6 @@ export default function AuthCallback() {
   }, [])
 
   return (
-    <div className="flex min-h-svh items-center justify-center text-sm text-ink-soft">
-      Menyelesaikan proses masuk…
-    </div>
+    <div className="flex min-h-svh items-center justify-center text-sm text-ink-soft">Menyelesaikan proses masuk…</div>
   )
 }

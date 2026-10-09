@@ -8,7 +8,12 @@ import type { SummaryCard } from '../lib/api'
  */
 
 type Meeting = { tanggal: string; tempat: string; agenda: string }
-type FollowUp = { tanggal_meeting: string; tindak_lanjut: string; penanggung_jawab: string; status: 'Selesai' | 'Proses' | 'Belum Mulai' }
+type FollowUp = {
+  tanggal_meeting: string
+  tindak_lanjut: string
+  penanggung_jawab: string
+  status: 'Selesai' | 'Proses' | 'Belum Mulai'
+}
 type JadwalLain = { tanggal: string; waktu: string; tempat: string; agenda: string }
 
 const FOLLOWUP_STATUS_CLASS: Record<FollowUp['status'], string> = {

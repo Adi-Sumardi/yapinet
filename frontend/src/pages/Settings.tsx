@@ -44,7 +44,7 @@ export default function Settings() {
             <div className="flex items-center justify-between">
               <dt className="text-sm text-ink-soft">Status akun</dt>
               <dd className="text-sm font-semibold text-ink">
-                {me ? STATUS_LABEL[me.user.status] ?? me.user.status : '—'}
+                {me ? (STATUS_LABEL[me.user.status] ?? me.user.status) : '—'}
               </dd>
             </div>
             <div className="flex items-center justify-between">

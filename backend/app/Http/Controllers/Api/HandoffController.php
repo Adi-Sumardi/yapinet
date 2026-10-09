@@ -62,11 +62,11 @@ class HandoffController extends Controller
         if (! $app->sso_endpoint) {
             // Aplikasi belum mendukung SSO handoff — fallback ke tautan biasa (lihat callout Bab 06).
             return response()->json([
-                'redirect_url' => $publicBaseUrl . ($targetPath ? '/' . ltrim($targetPath, '/') : ''),
+                'redirect_url' => $publicBaseUrl.($targetPath ? '/'.ltrim($targetPath, '/') : ''),
             ]);
         }
 
-        $ssoPath = '/' . ltrim($app->sso_endpoint, '/');
+        $ssoPath = '/'.ltrim($app->sso_endpoint, '/');
 
         return response()->json([
             'redirect_url' => "{$publicBaseUrl}{$ssoPath}?ticket={$plainTicket}",

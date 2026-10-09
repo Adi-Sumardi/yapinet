@@ -18,8 +18,7 @@ final readonly class SummaryResult
         public array $details, // free-form per-app payload for custom detail views
         public ?CarbonImmutable $updatedAt,
         public ?string $detailPath,
-    ) {
-    }
+    ) {}
 
     public static function degraded(string $reason): self
     {
