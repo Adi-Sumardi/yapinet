@@ -45,6 +45,8 @@ class AppConnectionTestController extends Controller
                 'headline' => $result->headline,
                 'metrics' => $result->metrics,
                 'sections' => $result->sections,
+                'filters' => $result->filters,
+                'attention' => $result->attention,
                 'contract_version' => $result->contractVersion,
             ] : null,
         ]]);

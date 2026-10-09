@@ -2,7 +2,7 @@
 
 export type Tone = 'info' | 'ok' | 'warning' | 'critical' | 'neutral'
 export type SummaryStatus = 'ok' | 'warning' | 'critical' | 'degraded'
-export type ValueFormat = 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'text' | 'badge'
+export type ValueFormat = 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'text' | 'badge' | 'progress'
 export type OpenMode = 'link' | 'new_tab' | 'handoff' | 'oauth'
 export type AuthType = 'none' | 'bearer' | 'header'
 export type IconType = 'initials' | 'image'
@@ -30,31 +30,66 @@ export type MenuMeta = {
   announcement: { text: string; level: 'info' | 'warning' | 'critical' } | null
 }
 
-export type Metric = { label: string; value: string | number; format?: ValueFormat | null }
+/** v1.1: tampil hanya bila semua key cocok dengan filter terpilih. */
+export type When = Record<string, string>
+
+export type Metric = {
+  label: string
+  value: string | number
+  format?: ValueFormat | null
+  hint?: string
+  progress?: number
+  trend?: { text: string; tone: Tone }
+  when?: When
+}
+
+export type SummaryFilter = { key: string; label: string; default: string; options: { value: string; label: string }[] }
+
+export type AttentionItem = {
+  tone: Tone
+  title: string
+  description?: string
+  link?: string
+  link_label?: string
+  when?: When
+}
 
 export type BadgeValue = { text: string; tone?: Tone }
 
-export type Section =
-  | {
-      type: 'stats'
-      title?: string
-      items: { label: string; value: string | number; format?: ValueFormat; trend?: string }[]
-    }
-  | {
-      type: 'table'
-      title?: string
-      columns: { key: string; label: string; format?: ValueFormat }[]
-      rows: Record<string, unknown>[]
-      row_link?: string
-    }
-  | {
-      type: 'list'
-      title?: string
-      items: { title: string; subtitle?: string; badge?: BadgeValue; link?: string }[]
-    }
-  | { type: 'progress'; title?: string; items: { label: string; value: number }[] }
-  | { type: 'alert'; tone?: Tone; title?: string; text: string }
-  | { type: 'chart'; title?: string; items: { label: string; value: number }[]; format?: ValueFormat }
+type SectionBase = { title?: string; when?: When }
+
+export type Section = SectionBase &
+  (
+    | {
+        type: 'stats'
+        title?: string
+        items: { label: string; value: string | number; format?: ValueFormat; trend?: string }[]
+      }
+    | {
+        type: 'table'
+        title?: string
+        columns: { key: string; label: string; format?: ValueFormat }[]
+        rows: (Record<string, unknown> & { _emphasis?: Record<string, Tone> })[]
+        row_link?: string
+      }
+    | {
+        type: 'list'
+        title?: string
+        items: { title: string; subtitle?: string; badge?: BadgeValue; link?: string }[]
+      }
+    | { type: 'progress'; title?: string; items: { label: string; value: number }[] }
+    | { type: 'alert'; tone?: Tone; title?: string; text: string }
+    | {
+        type: 'chart'
+        title?: string
+        variant?: 'horizontal' | 'columns' | 'stacked'
+        format?: ValueFormat
+        highlight_last?: boolean
+        series?: { key: string; label: string; tone?: Tone }[]
+        items: ({ label: string; value?: number } & Record<string, unknown>)[]
+      }
+    | { type: 'funnel'; title?: string; items: { label: string; value: number }[] }
+  )
 
 export type SummaryCard = {
   unit: { id: string; name: string } | null
@@ -63,6 +98,8 @@ export type SummaryCard = {
   headline: string | null
   metrics: Metric[]
   sections: Section[]
+  filters: SummaryFilter[]
+  attention: AttentionItem[]
   details: Record<string, unknown>
   contract_version: number
   error_message: string | null

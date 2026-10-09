@@ -2,10 +2,10 @@ import { Link, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, ApiError, type SummaryCard } from '../lib/api'
-import { formatDateTime, formatRelative, formatValue } from '../lib/format'
+import { formatDateTime, formatRelative } from '../lib/format'
 import { menuKeys, useAppDetail, useOpenApp } from '../features/menu/useMenu'
 import MenuIcon from '../features/menu/MenuIcon'
-import SectionRenderer from '../features/app-detail/sections'
+import DetailView from '../features/app-detail/DetailView'
 import { CUSTOM_LAYOUTS } from '../features/app-detail/layouts'
 import AppShell from '../components/layout/AppShell'
 import Badge, { STATUS_LABEL, STATUS_TONE } from '../components/ui/Badge'
@@ -51,7 +51,10 @@ export default function AppDetail() {
 
   const cards = app?.cards ?? []
   const withData = cards.filter(hasData)
-  const Custom = app ? CUSTOM_LAYOUTS[app.detail_layout] : undefined
+  // Layout khusus lama hanya untuk aplikasi yang belum mengirim kontrak v1.1.
+  const isV11 = withData.some((c) => c.contract_version >= 2)
+  const Custom = app && !isV11 ? CUSTOM_LAYOUTS[app.detail_layout] : undefined
+  const status = withData[0]?.status
   const latest = cards
     .map((c) => c.fetched_at)
     .filter(Boolean)
@@ -82,7 +85,11 @@ export default function AppDetail() {
             <div className="flex items-center gap-4">
               <MenuIcon icon={app.icon} color={app.color} shape="rounded" />
               <div>
-                <h1 className="font-display text-xl font-bold text-ink">{app.name}</h1>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h1 className="font-display text-xl font-bold text-ink">{app.name}</h1>
+                  {status && status !== 'degraded' && <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>}
+                  {withData[0]?.is_stale && <Badge>Data lama</Badge>}
+                </div>
                 {app.description && <p className="text-sm text-ink-soft">{app.description}</p>}
                 {latest && (
                   <p className="mt-0.5 text-xs text-ink-faint" title={formatDateTime(latest)}>
@@ -151,31 +158,16 @@ function GenericCard({
 }) {
   return (
     <div className="flex flex-col gap-5">
-      {(showUnit || card.headline || card.status !== 'ok') && (
+      {(showUnit || card.headline) && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line-soft bg-surface p-5">
           <div>
             {showUnit && <h2 className="font-display text-sm font-bold text-ink">{card.unit?.name ?? 'Semua unit'}</h2>}
             {card.headline && <p className="text-sm text-ink-soft">{card.headline}</p>}
           </div>
-          <div className="flex gap-2">
-            {card.is_stale && <Badge>Data lama</Badge>}
-            <Badge tone={STATUS_TONE[card.status]}>{STATUS_LABEL[card.status]}</Badge>
-          </div>
+          {showUnit && <Badge tone={STATUS_TONE[card.status]}>{STATUS_LABEL[card.status]}</Badge>}
         </div>
       )}
-
-      {card.metrics.length > 0 && card.sections.length === 0 && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {card.metrics.map((m) => (
-            <div key={m.label} className="rounded-2xl border border-line-soft bg-surface p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">{m.label}</p>
-              <p className="mt-1 text-xl font-bold tabular-nums text-ink">{formatValue(m.value, m.format)}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {card.sections.length > 0 && <SectionRenderer sections={card.sections} onOpen={onOpen} />}
+      <DetailView card={card} onOpen={onOpen} />
     </div>
   )
 }

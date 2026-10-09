@@ -170,4 +170,26 @@ class AdminAppTest extends TestCase
 
         $this->assertSame(1, $lookups);
     }
+
+    public function test_contract_v11_fixture_is_accepted_without_warnings_and_stored(): void
+    {
+        $payload = json_decode(file_get_contents(base_path('tests/fixtures/summary-v1.1.json')), true);
+        Http::fake(['*' => Http::response($payload)]);
+        $app = YapinetApp::factory()->create();
+
+        $test = $this->actingAs($this->admin)->postJson('/api/admin/apps/test-connection', [
+            'summary_url' => $app->summary_url, 'auth_type' => 'none',
+        ])->assertOk();
+
+        $this->assertSame([], $test->json('data.warnings'));
+        $this->assertSame(2, $test->json('data.preview.contract_version'));
+
+        $this->actingAs($this->admin)->postJson("/api/admin/apps/{$app->id}/refresh")->assertOk();
+
+        $card = $this->actingAs($this->admin)->getJson("/api/apps/{$app->slug}")->json('data.cards.0');
+        $this->assertSame('unit', $card['filters'][0]['key']);
+        $this->assertSame('critical', $card['attention'][0]['tone']);
+        $this->assertSame(['unit' => 'smp'], $card['metrics'][2]['when']);
+        $this->assertSame('funnel', $card['sections'][1]['type']);
+    }
 }

@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Kontrak ringkasan v1.1 (rules/detail-pages.md): filter yang disediakan
+     * aplikasi anak dan kartu "Perlu perhatian".
+     */
+    public function up(): void
+    {
+        Schema::table('app_summary_cache', function (Blueprint $table) {
+            $table->json('filters')->nullable()->after('sections');
+            $table->json('attention')->nullable()->after('filters');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('app_summary_cache', function (Blueprint $table) {
+            $table->dropColumn(['filters', 'attention']);
+        });
+    }
+};

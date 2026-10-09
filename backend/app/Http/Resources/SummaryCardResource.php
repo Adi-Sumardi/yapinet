@@ -18,6 +18,8 @@ class SummaryCardResource extends JsonResource
             'headline' => $this->headline,
             'metrics' => $this->metrics ?? [],
             'sections' => $this->sections ?? [],
+            'filters' => $this->filters ?? [],
+            'attention' => $this->attention ?? [],
             'details' => $this->details ?? [],
             'contract_version' => $this->contract_version,
             'error_message' => $this->error_message,

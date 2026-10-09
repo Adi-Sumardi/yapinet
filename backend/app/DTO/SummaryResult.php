@@ -20,6 +20,8 @@ final readonly class SummaryResult
         public ?CarbonImmutable $updatedAt,
         public ?string $detailPath,
         public ?string $errorMessage = null,
+        public array $filters = [], // v1.1: [{key, label, default, options[]}]
+        public array $attention = [], // v1.1: [{tone, title, description?, link?, link_label?, when?}]
     ) {}
 
     public static function degraded(string $reason): self

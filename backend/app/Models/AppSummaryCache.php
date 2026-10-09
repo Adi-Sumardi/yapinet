@@ -14,7 +14,7 @@ class AppSummaryCache extends Model
     protected $table = 'app_summary_cache';
 
     protected $fillable = [
-        'app_id', 'unit_id', 'scope_key', 'status', 'headline', 'metrics', 'details', 'sections',
+        'app_id', 'unit_id', 'scope_key', 'status', 'headline', 'metrics', 'details', 'sections', 'filters', 'attention',
         'contract_version', 'error_message', 'fetched_at', 'expires_at',
     ];
 
@@ -24,6 +24,8 @@ class AppSummaryCache extends Model
             'metrics' => 'array',
             'details' => 'array',
             'sections' => 'array',
+            'filters' => 'array',
+            'attention' => 'array',
             'contract_version' => 'integer',
             'fetched_at' => 'datetime',
             'expires_at' => 'datetime',

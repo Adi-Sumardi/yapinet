@@ -1,0 +1,89 @@
+{
+  "contract_version": 2,
+  "status": "warning",
+  "headline": "18 pengajuan menunggu persetujuan",
+  "updated_at": "2026-10-09T15:00:00+07:00",
+  "filters": [
+    {
+      "key": "unit",
+      "label": "Unit",
+      "default": "all",
+      "options": [
+        { "value": "all", "label": "Semua unit" },
+        { "value": "smp", "label": "SMP" }
+      ]
+    }
+  ],
+  "attention": [
+    {
+      "tone": "critical",
+      "title": "3 pengajuan tertunda lebih dari 14 hari",
+      "description": "Tertua: Renovasi lab IPA (21 hari)",
+      "link": "/pengajuan?status=menunggu",
+      "link_label": "Lihat antrean",
+      "when": { "unit": "all" }
+    }
+  ],
+  "metrics": [
+    { "label": "Total APBS", "value": 12400000000, "format": "currency", "hint": "6 unit", "when": { "unit": "all" } },
+    { "label": "Realisasi", "value": 0.61, "format": "percent", "progress": 0.61, "trend": { "text": "▲ 4% dari bulan lalu", "tone": "ok" }, "when": { "unit": "all" } },
+    { "label": "Realisasi", "value": 0.92, "format": "percent", "progress": 0.92, "when": { "unit": "smp" } }
+  ],
+  "sections": [
+    {
+      "type": "table",
+      "title": "Serapan per unit",
+      "columns": [
+        { "key": "unit", "label": "Unit" },
+        { "key": "serapan", "label": "Serapan", "format": "progress" },
+        { "key": "sisa", "label": "Sisa", "format": "currency" }
+      ],
+      "rows": [
+        { "unit": "SD", "serapan": 0.63, "sisa": 1200000000 },
+        { "unit": "SMP", "serapan": 0.92, "sisa": 118000000, "_emphasis": { "serapan": "warning" } }
+      ],
+      "when": { "unit": "all" }
+    },
+    {
+      "type": "funnel",
+      "title": "Alur persetujuan",
+      "items": [
+        { "label": "Diajukan", "value": 120 },
+        { "label": "Disetujui kepala unit", "value": 96 },
+        { "label": "Dibayar", "value": 71 }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "columns",
+      "title": "Realisasi 3 bulan",
+      "format": "percent",
+      "highlight_last": true,
+      "items": [
+        { "label": "Agu", "value": 0.41 },
+        { "label": "Sep", "value": 0.52 },
+        { "label": "Okt", "value": 0.61 }
+      ]
+    },
+    {
+      "type": "chart",
+      "variant": "stacked",
+      "title": "Status pengajuan per bulan",
+      "series": [
+        { "key": "ok", "label": "Disetujui", "tone": "ok" },
+        { "key": "wait", "label": "Menunggu", "tone": "warning" }
+      ],
+      "items": [
+        { "label": "Sep", "ok": 40, "wait": 6 },
+        { "label": "Okt", "ok": 31, "wait": 18 }
+      ]
+    },
+    {
+      "type": "list",
+      "title": "Antrean persetujuan",
+      "items": [
+        { "title": "Renovasi lab IPA", "subtitle": "SMP · Rp86.500.000", "badge": { "text": "21 hari", "tone": "critical" }, "link": "/pengajuan/123" }
+      ]
+    }
+  ]
+}

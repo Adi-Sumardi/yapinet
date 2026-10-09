@@ -21,12 +21,44 @@ function SectionCard({ title, children }: { title?: string; children: ReactNode 
   )
 }
 
-function Cell({ value, format }: { value: unknown; format?: ValueFormat }) {
+const TONE_TEXT: Record<Tone, string> = {
+  critical: 'text-crit font-semibold',
+  warning: 'text-warn font-semibold',
+  ok: 'text-good',
+  info: 'text-accent',
+  neutral: 'text-ink',
+}
+
+const TONE_BAR: Record<Tone, string> = {
+  critical: 'bg-crit',
+  warning: 'bg-warn',
+  ok: 'bg-good',
+  info: 'bg-accent',
+  neutral: 'bg-ink-faint',
+}
+
+/** Bar mini 0–1 untuk sel tabel format `progress` (v1.1). */
+function ProgressCell({ value, tone }: { value: unknown; tone?: Tone }) {
+  const ratio = Math.max(0, Math.min(1, Number(value) || 0))
+  return (
+    <span className="flex min-w-[120px] items-center gap-2">
+      <span className="h-2 flex-1 overflow-hidden rounded-full bg-surface-soft">
+        <span className={`block h-full rounded-full ${TONE_BAR[tone ?? 'ok']}`} style={{ width: `${ratio * 100}%` }} />
+      </span>
+      <span className={`w-11 text-right text-xs tabular-nums ${tone ? TONE_TEXT[tone] : 'text-ink-soft'}`}>
+        {formatPercent(ratio)}
+      </span>
+    </span>
+  )
+}
+
+function Cell({ value, format, tone }: { value: unknown; format?: ValueFormat; tone?: Tone }) {
+  if (format === 'progress') return <ProgressCell value={value} tone={tone} />
   if (format === 'badge' && value && typeof value === 'object' && 'text' in value) {
     const badge = value as BadgeValue
     return <Badge tone={badge.tone}>{badge.text}</Badge>
   }
-  return <>{formatValue(value, format)}</>
+  return <span className={tone ? TONE_TEXT[tone] : undefined}>{formatValue(value, format)}</span>
 }
 
 /** Ganti {kolom} di row_link dengan nilai baris. */
@@ -103,7 +135,7 @@ function TableSection({ section, onOpen }: { section: Extract<Section, { type: '
                     key={c.key}
                     className={`py-3 pr-4 text-ink ${['number', 'currency', 'percent'].includes(c.format ?? '') ? 'tabular-nums' : ''}`}
                   >
-                    <Cell value={row[c.key]} format={c.format} />
+                    <Cell value={row[c.key]} format={c.format} tone={row._emphasis?.[c.key]} />
                   </td>
                 ))}
                 {section.row_link && (
@@ -131,7 +163,7 @@ function TableSection({ section, onOpen }: { section: Extract<Section, { type: '
               <div key={c.key} className="flex items-center justify-between gap-3 py-0.5 text-sm">
                 <span className="text-xs text-ink-faint">{c.label}</span>
                 <span className="text-right font-medium text-ink">
-                  <Cell value={row[c.key]} format={c.format} />
+                  <Cell value={row[c.key]} format={c.format} tone={row._emphasis?.[c.key]} />
                 </span>
               </div>
             ))}
@@ -229,6 +261,9 @@ function ProgressSection({ section }: { section: Extract<Section, { type: 'progr
 }
 
 function ChartSection({ section }: { section: Extract<Section, { type: 'chart' }> }) {
+  if (section.variant === 'columns') return <ColumnChart section={section} />
+  if (section.variant === 'stacked') return <StackedChart section={section} />
+
   const max = Math.max(1, ...section.items.map((i) => Number(i.value) || 0))
   return (
     <SectionCard title={section.title}>
@@ -246,6 +281,111 @@ function ChartSection({ section }: { section: Extract<Section, { type: 'chart' }
           </div>
         ))}
       </div>
+    </SectionCard>
+  )
+}
+
+/** Kolom vertikal per periode; kolom terakhir disorot (periode berjalan). */
+function ColumnChart({ section }: { section: Extract<Section, { type: 'chart' }> }) {
+  const max = Math.max(section.format === 'percent' ? 1 : 0, ...section.items.map((i) => Number(i.value) || 0)) || 1
+  const last = section.items.length - 1
+  return (
+    <SectionCard title={section.title}>
+      <div className="flex h-44 items-end gap-2" role="img" aria-label={section.title}>
+        {section.items.map((item, i) => {
+          const current = section.highlight_last && i === last
+          return (
+            <div key={i} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5">
+              <span className={`text-[11px] tabular-nums ${current ? 'font-semibold text-ink' : 'text-ink-soft'}`}>
+                {formatValue(item.value, section.format)}
+              </span>
+              <div
+                className={`w-full rounded-t-lg rounded-b ${current ? 'bg-accent' : 'bg-accent/40'}`}
+                style={{ height: `${Math.max(2, ((Number(item.value) || 0) / max) * 100)}%` }}
+              />
+              <span className={`truncate text-[11px] ${current ? 'font-semibold text-ink' : 'text-ink-soft'}`}>
+                {item.label}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </SectionCard>
+  )
+}
+
+/** Kolom bertumpuk per periode (mis. hadir tepat waktu vs terlambat). */
+function StackedChart({ section }: { section: Extract<Section, { type: 'chart' }> }) {
+  const series = section.series ?? []
+  const totals = section.items.map((item) => series.reduce((sum, s) => sum + (Number(item[s.key]) || 0), 0))
+  const max = Math.max(1, ...totals)
+  return (
+    <SectionCard title={section.title}>
+      <div className="flex h-44 items-end gap-2" role="img" aria-label={section.title}>
+        {section.items.map((item, i) => (
+          <div key={i} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5">
+            <div
+              className="flex w-full flex-col-reverse overflow-hidden rounded-md"
+              style={{ height: `${Math.max(2, (totals[i] / max) * 100)}%` }}
+              title={series.map((s) => `${s.label}: ${formatValue(item[s.key], section.format)}`).join(' · ')}
+            >
+              {series.map((s) => (
+                <div key={s.key} className={TONE_BAR[s.tone ?? 'info']} style={{ flex: Number(item[s.key]) || 0 }} />
+              ))}
+            </div>
+            <span className="truncate text-[11px] text-ink-soft">{item.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-4 text-xs text-ink-soft">
+        {series.map((s) => (
+          <span key={s.key} className="inline-flex items-center gap-1.5">
+            <span className={`h-2.5 w-2.5 rounded-sm ${TONE_BAR[s.tone ?? 'info']}`} />
+            {s.label}
+          </span>
+        ))}
+      </div>
+    </SectionCard>
+  )
+}
+
+/** Tahapan berurutan: % terhadap tahap pertama, penurunan terbesar disorot. */
+function FunnelSection({ section }: { section: Extract<Section, { type: 'funnel' }> }) {
+  const first = Number(section.items[0]?.value) || 1
+  const drops = section.items.map((item, i) =>
+    i === 0 ? 0 : (Number(section.items[i - 1].value) || 0) - (Number(item.value) || 0),
+  )
+  const biggest = drops.indexOf(Math.max(...drops))
+  return (
+    <SectionCard title={section.title}>
+      <div className="flex flex-col gap-2">
+        {section.items.map((item, i) => {
+          const ratio = (Number(item.value) || 0) / first
+          const isDrop = i === biggest && drops[i] > 0
+          return (
+            <div key={i} className="grid grid-cols-[minmax(0,11rem)_1fr_3.5rem] items-center gap-3 text-sm">
+              <span className={`truncate ${isDrop ? 'font-semibold text-ink' : 'text-ink-soft'}`}>{item.label}</span>
+              <div className="h-7 overflow-hidden rounded-lg bg-surface-soft">
+                <div
+                  className={`flex h-full items-center rounded-lg px-2.5 text-xs font-semibold text-white ${isDrop ? 'bg-warn' : 'bg-accent'}`}
+                  style={{ width: `${Math.max(ratio * 100, 8)}%` }}
+                >
+                  {formatValue(item.value)}
+                </div>
+              </div>
+              <span className={`text-right tabular-nums ${isDrop ? 'font-semibold text-warn' : 'text-ink-soft'}`}>
+                {formatPercent(ratio)}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+      {biggest > 0 && drops[biggest] > 0 && (
+        <p className="mt-3 text-xs text-warn">
+          Penurunan terbesar: {section.items[biggest - 1].label} → {section.items[biggest].label} (−
+          {formatValue(drops[biggest])})
+        </p>
+      )}
     </SectionCard>
   )
 }
@@ -271,28 +411,39 @@ function AlertSection({ section }: { section: Extract<Section, { type: 'alert' }
   )
 }
 
+/** Tabel, funnel, statistik & peringatan memakai lebar penuh; lainnya berpasangan 2 kolom. */
+const FULL_WIDTH = new Set(['table', 'funnel', 'stats', 'alert'])
+
 /** Memilih renderer berdasarkan type; tipe tak dikenal diabaikan diam-diam. */
 export default function SectionRenderer({ sections, onOpen }: { sections: Section[]; onOpen: OpenPath }) {
   return (
-    <div className="flex flex-col gap-5">
-      {sections.map((section, i) => {
-        switch (section.type) {
-          case 'stats':
-            return <StatsSection key={i} section={section} />
-          case 'table':
-            return <TableSection key={i} section={section} onOpen={onOpen} />
-          case 'list':
-            return <ListSection key={i} section={section} onOpen={onOpen} />
-          case 'progress':
-            return <ProgressSection key={i} section={section} />
-          case 'chart':
-            return <ChartSection key={i} section={section} />
-          case 'alert':
-            return <AlertSection key={i} section={section} />
-          default:
-            return null
-        }
-      })}
+    <div className="grid gap-5 md:grid-cols-2">
+      {sections.map((section, i) => (
+        <div key={i} className={`min-w-0 ${FULL_WIDTH.has(section.type) ? 'md:col-span-2' : ''}`}>
+          {renderSection(section, onOpen)}
+        </div>
+      ))}
     </div>
   )
+}
+
+function renderSection(section: Section, onOpen: OpenPath) {
+  switch (section.type) {
+    case 'stats':
+      return <StatsSection section={section} />
+    case 'table':
+      return <TableSection section={section} onOpen={onOpen} />
+    case 'list':
+      return <ListSection section={section} onOpen={onOpen} />
+    case 'progress':
+      return <ProgressSection section={section} />
+    case 'chart':
+      return <ChartSection section={section} />
+    case 'funnel':
+      return <FunnelSection section={section} />
+    case 'alert':
+      return <AlertSection section={section} />
+    default:
+      return null
+  }
 }

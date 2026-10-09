@@ -81,6 +81,7 @@ export function formatValue(value: unknown, format?: ValueFormat | null): string
       case 'currency':
         return formatRupiah(value)
       case 'percent':
+      case 'progress':
         return formatPercent(value)
       case 'number':
       case undefined:
