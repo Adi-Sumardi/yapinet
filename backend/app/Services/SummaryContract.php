@@ -23,15 +23,15 @@ class SummaryContract
     public const TONES = ['info', 'ok', 'warning', 'critical', 'neutral'];
 
     // v1.1 mengirim varian per nilai filter (`when`), jadi batasnya lebih longgar.
-    private const MAX_METRICS = 64;
+    private const MAX_METRICS = 240;
 
-    private const MAX_SECTIONS = 80;
+    private const MAX_SECTIONS = 200;
 
-    private const MAX_ATTENTION = 40;
+    private const MAX_ATTENTION = 120;
 
     private const MAX_FILTERS = 4;
 
-    private const MAX_FILTER_OPTIONS = 16;
+    private const MAX_FILTER_OPTIONS = 60;
 
     private const MAX_ITEMS = 200;
 
