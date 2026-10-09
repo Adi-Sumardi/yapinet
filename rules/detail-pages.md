@@ -32,6 +32,10 @@ kartu punya tautan langsung ke halaman terkait di aplikasi itu.
 
 - **Agregat dulu, individu hanya untuk pengecualian.** Nama siswa, gaji
   perorangan, dan data calon murid **tidak** dikirim ke Yapinet.
+  Pengecualian yang diputuskan pemilik (2026-10-09): **daftar nama pegawai
+  (SiHaris) dan warga asrama (Simonas)** dikirim, tetapi hanya pada varian
+  satu departemen/asrama — cakupan "semua" tetap agregat, dan gaji
+  perorangan tetap tidak pernah dikirim.
 - **Setiap angka punya pembanding** (periode lalu, target, atau rata-rata unit lain)
   — angka tanpa konteks tidak bisa ditindaklanjuti.
 - **Status dihitung aplikasi asal** dengan aturan yang tertulis (tabel per
@@ -119,11 +123,12 @@ Kolom **Sekarang** = apa yang sudah dikirim endpoint ringkasan hari ini.
 - **Data tersedia:** `Employee`, `Department`, `Attendance`/`AttendanceRecap`, `LeaveRequest`, `OvertimeRequest`, `Reimbursement`, `ApprovalRecord`, `Payroll`.
 - **Tampilkan:** pegawai aktif, hadir hari ini, terlambat, menunggu persetujuan; kehadiran 7 hari (bertumpuk tepat/terlambat); antrean persetujuan per jenis; per unit kerja (kehadiran, keterlambatan, beban gaji total).
 - **Status:** Perhatian = approval > 3 hari, keterlambatan unit > 2× rata-rata, payroll belum diproses mendekati tutup buku.
-- **Privasi:** gaji hanya total per unit. Filter: unit kerja, periode.
+- **Daftar pegawai:** saat satu departemen dipilih → nama, jabatan, status kepegawaian, kehadiran hari ini (tepat waktu / terlambat N mnt / cuti / belum absen).
+- **Privasi:** gaji perorangan tidak dikirim; beban gaji hanya total perusahaan (total per departemen kecil bisa membuka gaji perorangan). Filter: departemen.
 
 ### 5. Simonas (`simonas-app`) — asrama
-- **Sekarang:** ✅ endpoint ada. Kirim warga aktif/cuti/alumni + **daftar warga berikut IPK & poin per nama** di `details`.
-- **Ubah:** ganti daftar nama penuh menjadi agregat (sebaran IPK, poin per aspek, per asrama); nama hanya untuk pengecualian (IPK < 2,75) dan sebaiknya tetap di Simonas.
+- **Sekarang:** ✅ v1.1. Cakupan semua asrama = agregat (sebaran IPK, aktivitas pembinaan, per asrama). `status_warga` hanya `aktif`/`nonaktif` (endpoint lama keliru menyebut nonaktif "Cuti").
+- **Daftar warga:** saat satu asrama dipilih → nama, kampus/prodi, angkatan, status, IPK terakhir, poin (IPK < 2,75 ditandai).
 - **Status:** Perhatian = ada warga IPK < 2,75 atau rasio cuti > 20% (aturan lama dipertahankan).
 - **Filter:** asrama, semester.
 
