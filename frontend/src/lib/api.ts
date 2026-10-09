@@ -20,6 +20,9 @@ export type * from './types'
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 const TOKEN_KEY = 'yapinet_token'
 
+/** Dikirim saat API membalas 401 (token dicabut, akun dinonaktifkan, sesi habis). */
+export const UNAUTHORIZED_EVENT = 'yapinet:unauthorized'
+
 export function getToken(): string | null {
   try {
     return localStorage.getItem(TOKEN_KEY)
@@ -82,6 +85,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (response.status === 401) {
     clearToken()
+    // AuthContext mendengarkan event ini → sesi dikosongkan → diarahkan ke /login.
+    window.dispatchEvent(new Event(UNAUTHORIZED_EVENT))
     throw new ApiError(401, 'Sesi berakhir, silakan masuk kembali.')
   }
 

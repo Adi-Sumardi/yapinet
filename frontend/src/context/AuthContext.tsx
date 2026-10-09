@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { api, clearToken, getToken, type Me } from '../lib/api'
+import { api, clearToken, getToken, UNAUTHORIZED_EVENT, type Me } from '../lib/api'
 
 type AuthState = {
   me: Me | null
@@ -48,6 +48,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refresh()
   }, [])
+
+  // 401 di tengah sesi → keluarkan user; RequireAuth lalu mengarahkan ke /login.
+  useEffect(() => {
+    const onUnauthorized = () => {
+      setMe(null)
+      queryClient.clear()
+    }
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized)
+  }, [queryClient])
 
   return (
     <AuthContext.Provider value={{ me, loading, isAuthenticated: !!me, refresh, logout }}>
