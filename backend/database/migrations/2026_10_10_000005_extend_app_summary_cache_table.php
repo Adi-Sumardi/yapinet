@@ -31,9 +31,13 @@ return new class extends Migration
             $seen[$key] = true;
         }
 
+        // Unique baru dulu (index lama dipakai FK app_id di MySQL — error 1553).
+        Schema::table('app_summary_cache', function (Blueprint $table) {
+            $table->unique(['app_id', 'scope_key']);
+        });
+
         Schema::table('app_summary_cache', function (Blueprint $table) {
             $table->dropUnique(['app_id', 'unit_id']);
-            $table->unique(['app_id', 'scope_key']);
             // string, bukan enum, supaya status baru tidak butuh ALTER enum.
             $table->string('status', 20)->default('degraded')->change();
         });
@@ -42,8 +46,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('app_summary_cache', function (Blueprint $table) {
-            $table->dropUnique(['app_id', 'scope_key']);
             $table->unique(['app_id', 'unit_id']);
+        });
+
+        Schema::table('app_summary_cache', function (Blueprint $table) {
+            $table->dropUnique(['app_id', 'scope_key']);
             $table->dropColumn(['scope_key', 'sections', 'contract_version', 'error_message']);
         });
     }

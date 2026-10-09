@@ -15,9 +15,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('user_app_access', function (Blueprint $table) {
-            $table->string('scope_key', 36)->default('all')->after('unit_id');
-        });
+        // Idempoten: percobaan deploy pertama sempat menambah kolom ini lalu
+        // gagal di dropUnique (MySQL 1553).
+        if (! Schema::hasColumn('user_app_access', 'scope_key')) {
+            Schema::table('user_app_access', function (Blueprint $table) {
+                $table->string('scope_key', 36)->default('all')->after('unit_id');
+            });
+        }
 
         DB::table('user_app_access')->whereNotNull('unit_id')->update(['scope_key' => DB::raw('unit_id')]);
 
@@ -31,9 +35,14 @@ return new class extends Migration
             $seen[$key] = true;
         }
 
+        // Unique baru dibuat DULU: di MySQL index lama dipakai FK user_id,
+        // jadi tidak bisa di-drop sebelum ada index pengganti (error 1553).
+        Schema::table('user_app_access', function (Blueprint $table) {
+            $table->unique(['user_id', 'app_id', 'scope_key']);
+        });
+
         Schema::table('user_app_access', function (Blueprint $table) {
             $table->dropUnique(['user_id', 'app_id', 'unit_id']);
-            $table->unique(['user_id', 'app_id', 'scope_key']);
         });
 
         Schema::table('user_app_access', function (Blueprint $table) {
@@ -49,8 +58,11 @@ return new class extends Migration
         });
 
         Schema::table('user_app_access', function (Blueprint $table) {
-            $table->dropUnique(['user_id', 'app_id', 'scope_key']);
             $table->unique(['user_id', 'app_id', 'unit_id']);
+        });
+
+        Schema::table('user_app_access', function (Blueprint $table) {
+            $table->dropUnique(['user_id', 'app_id', 'scope_key']);
             $table->dropColumn('scope_key');
         });
     }
