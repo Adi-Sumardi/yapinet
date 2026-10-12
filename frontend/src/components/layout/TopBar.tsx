@@ -29,7 +29,7 @@ export default function TopBar({ badge }: { badge?: ReactNode }) {
     'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-ink hover:bg-surface-soft'
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line-soft bg-surface/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-line-soft bg-surface/90 backdrop-blur print:hidden">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-3">
           <LogoMark size="sm" />

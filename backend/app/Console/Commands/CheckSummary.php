@@ -30,7 +30,9 @@ class CheckSummary extends Command
         $result = $contract->normalize($data, $warnings);
 
         $this->line("Kontrak v{$result->contractVersion} · status {$result->status} · ".count($result->filters).' filter · '
-            .count($result->attention).' perhatian · '.count($result->metrics).' angka · '.count($result->sections).' section');
+            .count($result->attention).' perhatian · '.count($result->metrics).' angka · '.count($result->sections).' section'
+            .($result->hero !== [] ? ' · '.count($result->hero).' hero' : '')
+            .($result->insights !== [] ? ' · '.count($result->insights).' sorotan' : ''));
 
         foreach ($warnings as $warning) {
             $this->warn("  ⚠ {$warning}");

@@ -22,6 +22,8 @@ final readonly class SummaryResult
         public ?string $errorMessage = null,
         public array $filters = [], // v1.1: [{key, label, default, options[]}]
         public array $attention = [], // v1.1: [{tone, title, description?, link?, link_label?, when?}]
+        public array $hero = [], // v1.2: [{value, format?, label, story?, side?, when?}]
+        public array $insights = [], // v1.2: [{text, tone, icon?, when?}]
     ) {}
 
     public static function degraded(string $reason): self

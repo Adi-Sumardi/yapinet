@@ -191,5 +191,28 @@ class AdminAppTest extends TestCase
         $this->assertSame('critical', $card['attention'][0]['tone']);
         $this->assertSame(['unit' => 'smp'], $card['metrics'][2]['when']);
         $this->assertSame('funnel', $card['sections'][1]['type']);
+
+        // v1.2: hero per filter, Sorotan, dan cara gambar angka kunci.
+        $this->assertSame('Total APBS', $card['hero'][0]['label']);
+        $this->assertSame(['unit' => 'smp'], $card['hero'][1]['when']);
+        $this->assertSame('clock', $card['insights'][0]['icon']);
+        $this->assertSame('ring', $card['metrics'][1]['display']);
+    }
+
+    public function test_contract_v12_drops_invalid_hero_and_insights_with_warnings(): void
+    {
+        $warnings = [];
+        $result = app(\App\Services\SummaryContract::class)->normalize([
+            'status' => 'ok',
+            'hero' => ['label' => 'Tanpa nilai'],
+            'insights' => [['text' => ''], ['text' => 'Oke', 'icon' => 'roket', 'tone' => 'aneh']],
+            'metrics' => [['label' => 'A', 'value' => 1, 'display' => 'ring']],
+        ], $warnings);
+
+        $this->assertSame([], $result->hero);
+        $this->assertSame([['text' => 'Oke', 'tone' => 'neutral']], $result->insights);
+        // display butuh progress; tanpa progress diabaikan.
+        $this->assertArrayNotHasKey('display', $result->metrics[0]);
+        $this->assertCount(2, $warnings);
     }
 }

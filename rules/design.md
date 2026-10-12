@@ -197,6 +197,19 @@ jalankan + toast dengan tombol **Urungkan** (6 dtk) — lebih cepat dari dialog.
 Teks tombol harus berupa **kata kerja spesifik** ("Ya, hapus", "Nonaktifkan"),
 bukan "OK"/"Ya".
 
+## Animasi halaman detail
+
+- Gerak untuk menceritakan data, bukan hiasan: angka menghitung naik
+  (`useCountUp`), cincin/gauge terisi, batang tumbuh bergiliran (±60 ms),
+  garis area tergambar lalu puncak muncul memantul, kartu muncul fade-up.
+- Hanya saat bagian itu terlihat (`useInView` → `data-in`), sekali per tampil.
+  Ganti filter tidak memasang ulang komponen: angka & batang bergerak dari
+  nilai lama ke nilai baru.
+- Kelas `anim-grow-x/y`, `anim-fade-up`, `anim-pop`, `anim-draw`, `anim-arc`,
+  `anim-size` di `index.css`; urutan lewat `--i`.
+- `prefers-reduced-motion` mematikan semua animasi; saat dicetak semua tampil
+  dalam keadaan akhir.
+
 ## Aksesibilitas
 
 - Kontras teks minimal 4.5:1 (cek warna menu dari admin → util memilih putih/gelap).

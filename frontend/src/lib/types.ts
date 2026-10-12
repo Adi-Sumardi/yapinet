@@ -40,8 +40,37 @@ export type Metric = {
   hint?: string
   progress?: number
   trend?: { text: string; tone: Tone }
+  /** v1.2: gambar `progress` sebagai cincin atau gauge setengah lingkaran. */
+  display?: 'ring' | 'gauge'
   when?: When
 }
+
+/** v1.2: angka utama di panel atas halaman detail. */
+export type HeroItem = {
+  value: string | number
+  format?: ValueFormat | null
+  label: string
+  /** Kalimat pendek; `**tebal**` ditampilkan tebal. */
+  story?: string
+  /** Label metric yang digambar di sisi kanan panel (cincin/gauge/angka). */
+  side?: string[]
+  when?: When
+}
+
+export type InsightIcon =
+  | 'trend-up'
+  | 'trend-down'
+  | 'filter'
+  | 'building'
+  | 'clock'
+  | 'people'
+  | 'money'
+  | 'check'
+  | 'alert'
+  | 'star'
+
+/** v1.2: kalimat "Sorotan"; `**tebal**` ditampilkan tebal. */
+export type Insight = { text: string; tone: Tone; icon?: InsightIcon; when?: When }
 
 export type SummaryFilter = { key: string; label: string; default: string; options: { value: string; label: string }[] }
 
@@ -71,20 +100,33 @@ export type Section = SectionBase &
         columns: { key: string; label: string; format?: ValueFormat }[]
         rows: (Record<string, unknown> & { _emphasis?: Record<string, Tone> })[]
         row_link?: string
+        /** v1.2: `cards` = kartu orang (kolom pertama jadi nama, kolom terakhir jadi badge). */
+        display?: 'table' | 'cards'
       }
     | {
         type: 'list'
         title?: string
-        items: { title: string; subtitle?: string; badge?: BadgeValue; link?: string }[]
+        items: { title: string; subtitle?: string; badge?: BadgeValue; link?: string; age_days?: number }[]
+        /** v1.2: `aging` = batang umur antrean dengan garis batas `limit_days`. */
+        display?: 'list' | 'aging'
+        limit_days?: number
       }
-    | { type: 'progress'; title?: string; items: { label: string; value: number }[] }
+    | {
+        type: 'progress'
+        title?: string
+        items: { label: string; value: number }[]
+        /** v1.2: garis target 0–1; warna batang mengikuti jarak ke target. */
+        target?: number
+      }
     | { type: 'alert'; tone?: Tone; title?: string; text: string }
     | {
         type: 'chart'
         title?: string
-        variant?: 'horizontal' | 'columns' | 'stacked'
+        variant?: 'horizontal' | 'columns' | 'stacked' | 'area' | 'treemap'
         format?: ValueFormat
         highlight_last?: boolean
+        /** v1.2: lencana pembanding di judul grafik, mis. "▼ 41% vs minggu lalu". */
+        compare?: { text: string; tone?: Tone }
         series?: { key: string; label: string; tone?: Tone }[]
         items: ({ label: string; value?: number } & Record<string, unknown>)[]
       }
@@ -100,6 +142,8 @@ export type SummaryCard = {
   sections: Section[]
   filters: SummaryFilter[]
   attention: AttentionItem[]
+  hero?: HeroItem[]
+  insights?: Insight[]
   details: Record<string, unknown>
   contract_version: number
   error_message: string | null

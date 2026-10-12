@@ -22,6 +22,12 @@ class SummaryContract
 
     public const TONES = ['info', 'ok', 'warning', 'critical', 'neutral'];
 
+    /** v1.2: cara menggambar angka kunci. */
+    public const METRIC_DISPLAYS = ['ring', 'gauge'];
+
+    /** v1.2: ikon kalimat Sorotan (dipetakan ke ikon Yapinet). */
+    public const INSIGHT_ICONS = ['trend-up', 'trend-down', 'filter', 'building', 'clock', 'people', 'money', 'check', 'alert', 'star'];
+
     // v1.1 mengirim varian per nilai filter (`when`), jadi batasnya lebih longgar.
     private const MAX_METRICS = 240;
 
@@ -34,6 +40,10 @@ class SummaryContract
     private const MAX_FILTER_OPTIONS = 60;
 
     private const MAX_ITEMS = 200;
+
+    private const MAX_HERO = 80;
+
+    private const MAX_INSIGHTS = 120;
 
     /** @param list<string> $warnings diisi peringatan */
     public function normalize(array $data, array &$warnings = []): SummaryResult
@@ -57,6 +67,8 @@ class SummaryContract
             sections: $this->sections($data['sections'] ?? [], $warnings),
             filters: $this->filters($data['filters'] ?? [], $warnings),
             attention: $this->attention($data['attention'] ?? [], $warnings),
+            hero: $this->hero($data['hero'] ?? [], $warnings),
+            insights: $this->insights($data['insights'] ?? [], $warnings),
             details: is_array($data['details'] ?? null) ? $data['details'] : [],
             contractVersion: (int) ($data['contract_version'] ?? 0),
             updatedAt: $this->date($data['updated_at'] ?? null, $warnings),
@@ -95,6 +107,7 @@ class SummaryContract
                 'hint' => is_string($metric['hint'] ?? null) ? Str::limit($metric['hint'], 80) : null,
                 'progress' => $progress,
                 'trend' => $trend ? ['text' => Str::limit($trend['text'], 60), 'tone' => $this->tone($trend['tone'] ?? null)] : null,
+                'display' => in_array($metric['display'] ?? null, self::METRIC_DISPLAYS, true) && $progress !== null ? $metric['display'] : null,
                 'when' => $this->when($metric['when'] ?? null),
             ], fn ($v) => $v !== null);
         }
@@ -203,6 +216,73 @@ class SummaryContract
                 'description' => is_string($item['description'] ?? null) ? Str::limit($item['description'], 160) : null,
                 'link' => $this->path($item['link'] ?? null, $warnings),
                 'link_label' => is_string($item['link_label'] ?? null) ? Str::limit($item['link_label'], 40) : null,
+                'when' => $this->when($item['when'] ?? null),
+            ], fn ($v) => $v !== null);
+        }
+
+        return $clean;
+    }
+
+    /**
+     * Angka utama di panel atas — v1.2. Boleh satu objek atau daftar varian
+     * per filter (`when`); disimpan selalu sebagai daftar.
+     */
+    private function hero(mixed $hero, array &$warnings): array
+    {
+        if ($hero === [] || $hero === null) {
+            return [];
+        }
+        $items = is_array($hero) && ! array_is_list($hero) ? [$hero] : $hero;
+        if (! is_array($items)) {
+            $warnings[] = 'Field "hero" harus objek atau daftar objek.';
+
+            return [];
+        }
+
+        $clean = [];
+        foreach (array_slice($items, 0, self::MAX_HERO) as $i => $item) {
+            if (! is_array($item) || ! is_scalar($item['value'] ?? null) || ! is_string($item['label'] ?? null)) {
+                $warnings[] = "hero[{$i}] butuh \"value\" (angka/teks) dan \"label\" (teks).";
+
+                continue;
+            }
+            $format = $item['format'] ?? null;
+            $side = is_array($item['side'] ?? null) ? array_values(array_filter($item['side'], 'is_string')) : [];
+
+            $clean[] = array_filter([
+                'value' => $item['value'],
+                'format' => in_array($format, self::FORMATS, true) ? $format : null,
+                'label' => Str::limit($item['label'], 60),
+                'story' => is_string($item['story'] ?? null) ? Str::limit($item['story'], 200) : null,
+                'side' => $side !== [] ? array_map(fn ($s) => Str::limit($s, 40), array_slice($side, 0, 3)) : null,
+                'when' => $this->when($item['when'] ?? null),
+            ], fn ($v) => $v !== null);
+        }
+
+        return $clean;
+    }
+
+    /** Kalimat "Sorotan" — v1.2. `**tebal**` di teks ditampilkan tebal. */
+    private function insights(mixed $items, array &$warnings): array
+    {
+        if (! is_array($items) || ! array_is_list($items)) {
+            $warnings[] = 'Field "insights" harus berupa daftar (array).';
+
+            return [];
+        }
+
+        $clean = [];
+        foreach (array_slice($items, 0, self::MAX_INSIGHTS) as $i => $item) {
+            if (! is_array($item) || ! is_string($item['text'] ?? null) || trim($item['text']) === '') {
+                $warnings[] = "insights[{$i}] butuh \"text\" (teks).";
+
+                continue;
+            }
+
+            $clean[] = array_filter([
+                'text' => Str::limit($item['text'], 220),
+                'tone' => $this->tone($item['tone'] ?? null),
+                'icon' => in_array($item['icon'] ?? null, self::INSIGHT_ICONS, true) ? $item['icon'] : null,
                 'when' => $this->when($item['when'] ?? null),
             ], fn ($v) => $v !== null);
         }

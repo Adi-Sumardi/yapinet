@@ -36,6 +36,8 @@ class RefreshAppSummary
                 'sections' => $result->sections,
                 'filters' => $result->filters,
                 'attention' => $result->attention,
+                'hero' => $result->hero,
+                'insights' => $result->insights,
                 'contract_version' => $result->contractVersion,
                 'error_message' => $result->errorMessage,
                 'fetched_at' => now(),

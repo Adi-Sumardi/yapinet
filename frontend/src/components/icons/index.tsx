@@ -185,3 +185,50 @@ export const SpinnerIcon = ({ size = 16, className = '' }: { size?: number; clas
     <path d="M21 12a9 9 0 0 0-9-9" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
   </svg>
 )
+
+/* ── Ikon kalimat "Sorotan" halaman detail (kontrak v1.2 insights[].icon) ── */
+export const TrendUpIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m3 17 6-6 4 4 8-8" />
+    <path d="M14 7h7v7" />
+  </Svg>
+)
+export const TrendDownIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m3 7 6 6 4-4 8 8" />
+    <path d="M21 11v6h-6" />
+  </Svg>
+)
+export const FilterIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M3 4h18l-7 9v6l-4 2v-8z" />
+  </Svg>
+)
+export const BuildingIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M3 21h18M5 21V8l7-5 7 5v13M10 21v-6h4v6" />
+  </Svg>
+)
+export const ClockIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="13" r="8" />
+    <path d="M12 9v4l2 2M9 2h6" />
+  </Svg>
+)
+export const MoneyIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="6" width="18" height="12" rx="2" />
+    <circle cx="12" cy="12" r="2.5" />
+  </Svg>
+)
+export const StarIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" />
+  </Svg>
+)
+export const PrinterIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2" />
+    <rect x="6" y="14" width="12" height="7" rx="1" />
+  </Svg>
+)

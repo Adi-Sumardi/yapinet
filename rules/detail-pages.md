@@ -94,6 +94,27 @@ Semua field v1 tetap berlaku (`rules/api.md` bagian B). Tambahan:
 
 Batas ukuran tetap 512 KB; dengan varian per filter, kirim maksimal ~8 nilai per filter.
 
+## Kontrak ringkasan v1.2 — infografis (tambahan opsional, kompatibel mundur)
+
+Desain: kanvas "Yapinet Detail Infografis" (Okt 2026). `contract_version` tetap `2`;
+semua field di bawah opsional — aplikasi yang belum mengirimnya tetap tampil,
+dengan hero & Sorotan disusun otomatis oleh Yapinet dari data yang ada.
+
+| Field | Fungsi | Bila tidak dikirim |
+|---|---|---|
+| `hero` `{value, format?, label, story?, side?[], when?}` (objek atau daftar varian) | angka besar di panel navy + kalimat cerita; `side` = label metric yang digambar sebagai cincin/gauge di kanan | metric pertama jadi hero, metric ber-`progress` jadi cincin |
+| `insights[]` `{text, tone, icon?, when?}` | kartu "Sorotan"; `**tebal**` ditebalkan; `icon` ∈ trend-up, trend-down, filter, building, clock, people, money, check, alert, star | dihitung otomatis: tahap corong tersempit, tren 7 titik terakhir vs sebelumnya, puncak, baris tabel kritis, porsi terbesar |
+| metric `display: "ring" \| "gauge"` (butuh `progress`) | cincin / gauge setengah lingkaran | bar mini |
+| chart `variant: "area"` + `compare {text, tone}` | garis area dengan penanda puncak + lencana pembanding | — |
+| chart `variant: "treemap"` | peta porsi (luas = nilai, >10 item digabung "lainnya") | — |
+| progress `target` (0–1) | garis target; warna hijau/kuning/merah dari jarak ke target | warna netral |
+| table `display: "cards"` | kartu orang: kolom pertama = nama, terakhir = badge (nada dari `_emphasis`), urut yang perlu ditindaklanjuti dulu | tabel |
+| list `display: "aging"` + item `age_days` + `limit_days` | batang umur antrean dengan garis batas | daftar biasa |
+
+Tampilan: aksen warna per aplikasi (warna menu, dicerahkan di atas navy), titik
+kesegaran data (hijau berdenyut / kuning lama / merah gagal), tombol Cetak/PDF,
+kerangka memuat sebentuk halaman. Animasi: lihat rules/design.md → Animasi.
+
 ## Analisis per aplikasi
 
 Kolom **Sekarang** = apa yang sudah dikirim endpoint ringkasan hari ini.
