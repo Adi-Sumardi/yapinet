@@ -266,6 +266,14 @@ body {
 [data-in='false'] .anim-draw {
   stroke-dashoffset: 1;
 }
+/* Grafik area: terbuka seperti tirai dari kiri ke kanan. */
+.anim-wipe {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1.3s var(--ease-out-soft) 0.1s;
+}
+[data-in='false'] .anim-wipe {
+  clip-path: inset(0 100% 0 0);
+}
 /* Busur cincin/gauge: --arc-len = panjang penuh, --arc-off = sisa kosong. */
 .anim-arc {
   stroke-dashoffset: var(--arc-off, 0);
@@ -316,6 +324,7 @@ body {
   .anim-fade-up,
   .anim-pop,
   .anim-draw,
+  .anim-wipe,
   .anim-arc,
   .anim-size {
     transition: none !important;
@@ -337,6 +346,9 @@ body {
   }
   [data-in] .anim-draw {
     stroke-dashoffset: 0 !important;
+  }
+  [data-in] .anim-wipe {
+    clip-path: none !important;
   }
   [data-in] .anim-arc {
     stroke-dashoffset: var(--arc-off, 0) !important;

@@ -80,11 +80,11 @@ function SideMetric({ metric, accent, big }: { metric: Metric; accent: string; b
   return (
     <figure className="m-0 flex flex-col items-center gap-2">
       {metric.display === 'gauge' ? (
-        <Gauge value={metric.progress} width={big ? 230 : 170} color={accent} track="#1a3d6e" label={label}>
+        <Gauge value={metric.progress} width={big ? 230 : 170} color={accent} track="rgba(255,255,255,0.14)" label={label}>
           {inner}
         </Gauge>
       ) : (
-        <Ring value={metric.progress} size={big ? 190 : 140} color={accent} track="#1a3d6e" label={label}>
+        <Ring value={metric.progress} size={big ? 190 : 140} color={accent} track="rgba(255,255,255,0.14)" label={label}>
           {inner}
         </Ring>
       )}

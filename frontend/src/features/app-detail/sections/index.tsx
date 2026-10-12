@@ -360,7 +360,9 @@ function PersonCards({ section }: { section: Extract<Section, { type: 'table' }>
                   </p>
                 )}
               </div>
-              <span className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${chip}`}>{badgeText(row)}</span>
+              {formatValue(row[badgeCol.key], badgeCol.format) !== '—' && (
+                <span className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${chip}`}>{badgeText(row)}</span>
+              )}
             </li>
           )
         })}
@@ -617,12 +619,12 @@ function AreaChart({ section }: { section: Extract<Section, { type: 'chart' }> }
   return (
     <SectionCard title={section.title} aside={<CompareBadge compare={section.compare} />}>
       <div className="relative h-52" role="img" aria-label={`${section.title ?? 'Grafik'}: puncak ${formatValue(values[peak], section.format)} pada ${section.items[peak]?.label ?? ''}`}>
-        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden="true">
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="anim-wipe absolute inset-0 h-full w-full overflow-visible" aria-hidden="true">
           {[0.25, 0.5, 0.75].map((t) => (
             <line key={t} x1="0" x2={W} y1={pad + t * (H - pad * 2)} y2={pad + t * (H - pad * 2)} stroke="var(--color-line-soft)" strokeDasharray="4 5" vectorEffect="non-scaling-stroke" />
           ))}
-          <path d={area} fill="var(--color-accent-soft)" className="anim-fade-up" />
-          <path d={line} fill="none" stroke="var(--color-accent)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" pathLength={1} vectorEffect="non-scaling-stroke" className="anim-draw" />
+          <path d={area} fill="var(--color-accent-soft)" />
+          <path d={line} fill="none" stroke="var(--color-accent)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
         </svg>
         {/* Puncak: titik + label, muncul memantul setelah garis selesai. */}
         {n > 1 && values[peak] > 0 && (
@@ -783,7 +785,8 @@ function FunnelSection({ section }: { section: Extract<Section, { type: 'funnel'
                     }`}
                     style={{ ...v(i * 2), '--pulse-color': 'rgba(232,163,61,.45)' } as CSSProperties}
                   >
-                    ↓ {formatPercent(rates[i])} lanjut{i === narrowest ? ' · paling sempit' : ''}
+                    {rates[i] > 1 ? `↑ naik ${formatPercent(rates[i] - 1)}` : `↓ ${formatPercent(rates[i])} lanjut`}
+                    {i === narrowest ? ' · paling sempit' : ''}
                   </span>
                   <span />
                 </div>
